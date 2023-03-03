@@ -3,3 +3,5 @@
 
 # Env
 **/.env
+**/.env.prod
+**/.env.dev
