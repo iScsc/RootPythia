@@ -1,3 +1,4 @@
 #!/bin/sh
 
-python3 src/main.py
+docker build --file Dockerfile -t pyflag-bot:latest .
+docker run --rm --interactive --tty pyflag-bot:latest
