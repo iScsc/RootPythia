@@ -9,7 +9,7 @@ run__prod () {
 run__dev () {
 	# dev mode
 	docker build --file Dockerfile-dev -t pyflag-bot-dev:latest .
-	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/pyflag-bot/src pyflag-bot-dev:latest
+	docker run --rm --dns=8.8.8.8 --interactive --tty --env-file .env.dev --volume /home/xlitoni/Desktop/RootPythiaProj/RootPythia/src:/opt/pyflag-bot/src pyflag-bot-dev:latest
 }
 
 run() {
