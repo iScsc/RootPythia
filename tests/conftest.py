@@ -1,3 +1,5 @@
+import types
+
 import pytest
 
 
@@ -6,7 +8,8 @@ def pytest_configure():
 
 
 @pytest.fixture
-def dummy_fixture():
+def demo_fixture():
     """This fixture is a demo fixture"""
-    Obj = "not even an object, simply a concept demo"
-    return Obj
+    obj = types.SimpleNamespace()
+    obj.demo_attr = 2
+    return obj
