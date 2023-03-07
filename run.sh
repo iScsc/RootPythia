@@ -13,9 +13,9 @@ run__dev () {
 }
 
 run__watch () {
-	echo 'Watching src/*.py files'
+	echo 'Watching RootPythia'
 	[ ! -f ~/.local/bin/watchmedo ] && pip install watchdog
-	~/.local/bin/watchmedo shell-command --patterns 'src/*.py' --recursive --command='echo "Reloading" && ./run.sh dev'
+	~/.local/bin/watchmedo shell-command --patterns "requirement*.txt;src/*.py" --recursive --command='echo "Reloading" && ./run.sh dev'
 }
 
 run() {
