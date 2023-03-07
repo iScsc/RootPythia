@@ -1,6 +1,8 @@
 from os import getenv
+from api.fetch import ApiRootMe
 
 import discord
+
 
 SECRET = getenv('USELESS_SECRET')
 MODE = getenv('MODE')
@@ -13,6 +15,9 @@ def main():
 
     print(f"And we currently are in {MODE} mode")
 
+    api_rootme = ApiRootMe()
+    print(api_rootme.GetChallengeById(5))
+    print(api_rootme.GetUserById(471176))
 
 if __name__ == '__main__':
     main()

@@ -2,10 +2,12 @@ from os import getenv
 
 import requests
 import time
-import json
 
 class ApiRootMe() :
-    """Class that takes care of sending the requests to the Root-me.org API"""
+    """
+    Class that takes care of sending the requests to the Root-me.org API
+    These functions should not be launched into separate threads in order to avoid being banned by the API (As long as a proper rate limiting design hasn't been implemented) 
+    """
 
     def __init__(self) -> None:
         self.url = "https://api.www.root-me.org/"
@@ -23,6 +25,7 @@ class ApiRootMe() :
             raise Exception(f"GET /challenges/{id} -> {resp.status_code}")
         # take response as json
         data = resp.json()
+        time.sleep(0.050)
         
         return(data)
     
@@ -35,9 +38,10 @@ class ApiRootMe() :
         resp = requests.get(f"https://api.www.root-me.org/auteurs/{id}", cookies=cookies)
         #raise exception if the request does not work
         if resp.status_code != 200:
-            raise Exception(f"GET /users/{id} -> {resp.status_code}")
+            raise Exception(f"GET /auteurs/{id} -> {resp.status_code}")
         # take response as json
         data = resp.json()
+        time.sleep(0.050)
         
         return(data)
 
