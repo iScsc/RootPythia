@@ -1,8 +1,0 @@
-FROM python:3.10.9
-
-COPY requirements.txt /tmp/requirements.txt
-COPY requirements-dev.txt /tmp/requirements-dev.txt
-RUN pip install -r /tmp/requirements-dev.txt
-
-ENTRYPOINT ["python3"]
-CMD ["/opt/pyflag-bot/src/main.py"]
