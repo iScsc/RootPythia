@@ -1,4 +1,5 @@
 FROM python:3.10.9
+RUN apt-get update && pip install --upgrade pip
 
 COPY requirements.txt /tmp/requirements.txt
 COPY requirements-dev.txt /tmp/requirements-dev.txt
