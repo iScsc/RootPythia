@@ -1,8 +1,14 @@
-FROM python:3.10.9
+FROM ubuntu:latest
+
+RUN apt update && apt upgrade
+RUN apt install python3.10 pip -y
 
 COPY requirements.txt /tmp/requirements.txt
 COPY requirements-dev.txt /tmp/requirements-dev.txt
-RUN pip install -r /tmp/requirements-dev.txt
+RUN python3.10 -m pip install --upgrade pip
+RUN python3.10 -m pip install -r /tmp/requirements-dev.txt
 
-ENTRYPOINT ["python3"]
-CMD ["/opt/pyflag-bot/src/main.py"]
+#RUN useradd --create-home --shell /bin/bash dev
+#USER dev
+WORKDIR /opt/root-pythia
+CMD ["bash"]
