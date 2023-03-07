@@ -12,6 +12,12 @@ run__dev () {
 	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-dev:latest
 }
 
+run__watch () {
+	echo 'Watching src/*.py files'
+	[ ! -f ~/.local/bin/watchmedo ] && pip install watchdog
+	~/.local/bin/watchmedo shell-command --patterns 'src/*.py' --recursive --command='echo "Reloading" && ./run.sh dev'
+}
+
 run() {
 	local subcmd=$1; shift
 	if type "run__$subcmd" &>/dev/null; then
