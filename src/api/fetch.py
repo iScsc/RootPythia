@@ -20,10 +20,24 @@ class ApiRootMe() :
         resp = requests.get(f"https://api.www.root-me.org/challenges/{id}", cookies=cookies)
         #raise exception if the request does not work
         if resp.status_code != 200:
-            raise Exception("GET /challenges/{id}".format(resp.status_code))
+            raise Exception(f"GET /challenges/{id} -> {resp.status_code}")
         # take response as json
         data = resp.json()
         
         return(data)
-
+    
+    def GetUserById(self,id) :
+        """
+        Get a user from the API
+        -> returns the raw json for now
+        """
+        cookies = {"api_key": self.API_KEY.strip('"') }
+        resp = requests.get(f"https://api.www.root-me.org/auteurs/{id}", cookies=cookies)
+        #raise exception if the request does not work
+        if resp.status_code != 200:
+            raise Exception(f"GET /users/{id} -> {resp.status_code}")
+        # take response as json
+        data = resp.json()
+        
+        return(data)
 
