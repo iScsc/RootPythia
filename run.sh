@@ -2,14 +2,14 @@
 
 run__prod () {
 	# prod mode
-	docker build --file Dockerfile -t pyflag-bot:latest .
-	docker run --rm --interactive --tty --env-file .env.prod pyflag-bot:latest
+	docker build --file Dockerfile -t root-pythia:latest .
+	docker run --rm --interactive --tty --env-file .env.prod root-pythia:latest
 }
 
 run__dev () {
 	# dev mode
-	docker build --file Dockerfile-dev -t pyflag-bot-dev:latest .
-	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/pyflag-bot/src pyflag-bot-dev:latest
+	docker build --file Dockerfile.dev -t root-pythia-dev:latest .
+	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-dev:latest
 }
 
 run() {
