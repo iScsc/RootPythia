@@ -1,0 +1,21 @@
+name: Pytest unit tests
+run-name: Play pytest unit tests
+on: 
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  execute-pytest:
+    runs-on: ubuntu-latest
+    env:
+      MODE: test
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10.9'
+        cache: 'pip' # caching pip dependencies
+    - run: pip install -r requirements-dev.txt
+    - run: pytest
+
