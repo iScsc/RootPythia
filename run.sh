@@ -9,13 +9,13 @@ run__prod () {
 run__dev () {
 	# dev mode
 	docker build --file Dockerfile.dev -t root-pythia-dev:latest .
-	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-dev:latest
+	docker run --rm --interactive --tty --env-file .env.dev --volume `realpath ./src`:/opt/root-pythia/src root-pythia-dev:latest
 }
 
 run__watch () {
 	# watch mode
 	docker build --file Dockerfile.watch -t root-pythia-watch:latest .
-	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-watch:latest
+	docker run --rm --interactive --tty --env-file .env.dev --volume `realpath ./src`:/opt/root-pythia/src root-pythia-watch:latest
 }
 
 run() {
