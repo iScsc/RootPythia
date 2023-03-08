@@ -1,1 +1,2 @@
 discord.py==2.2.2
+sqlalchemy==2.0.5.post1
