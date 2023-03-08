@@ -1,10 +1,9 @@
 FROM python:3.10.9
 RUN apt-get update && pip install --upgrade pip
 
-WORKDIR /opt/root-pythia/src
 COPY requirements.txt /tmp/requirements.txt
 COPY requirements-dev.txt /tmp/requirements-dev.txt
 RUN pip install -r /tmp/requirements-dev.txt
 
-ENTRYPOINT ["python3"]
-CMD ["main.py"]
+WORKDIR /opt/root-pythia
+CMD ["bash"]
