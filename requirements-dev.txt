@@ -1,4 +1,4 @@
 -r requirements.txt
 pre-commit==3.1.1
 pytest==7.2.2
-watchdog
+watchdog==2.3.1

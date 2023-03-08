@@ -14,7 +14,7 @@ run__dev () {
 
 run__watch () {
 	# watch mode
-	docker build --file Dockerfile.watch -t root-pythia-dev:latest .
+	docker build --file Dockerfile.watch -t root-pythia-watch:latest .
 	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-watch:latest
 }
 
