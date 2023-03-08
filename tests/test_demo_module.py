@@ -1,5 +1,3 @@
-import pytest
-
 from src.demo_module import demo_func
 
 
