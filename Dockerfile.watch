@@ -1,9 +1,11 @@
 FROM python:3.10.9
 RUN pip install --upgrade pip
 
+WORKDIR /opt/root-pythia
+COPY watch.sh .
 COPY requirements.txt /tmp/requirements.txt
 COPY requirements-dev.txt /tmp/requirements-dev.txt
 RUN pip install -r /tmp/requirements-dev.txt
 
-WORKDIR /opt/root-pythia
-CMD ["bash"]
+ENTRYPOINT ["bash"]
+CMD ["watch.sh"]

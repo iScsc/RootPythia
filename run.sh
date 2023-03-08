@@ -12,13 +12,19 @@ run__dev () {
 	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-dev:latest
 }
 
+run__watch () {
+	# watch mode
+	docker build --file Dockerfile.watch -t root-pythia-watch:latest .
+	docker run --rm --interactive --tty --env-file .env.dev --volume ./src:/opt/root-pythia/src root-pythia-watch:latest
+}
+
 run() {
 	local subcmd=$1; shift
 	if type "run__$subcmd" &>/dev/null; then
 		"run__$subcmd" "$@"
 	else
 		echo "subcommand '$subcmd' not recognized" >&2
-		echo "please only use 'prod' or 'dev'" >&2
+		echo "please only use 'prod', 'dev' or 'watch'" >&2
 		exit 1
 	fi
 }
