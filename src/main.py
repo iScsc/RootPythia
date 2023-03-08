@@ -9,7 +9,7 @@ def main():
     print("hello world from pyflag")
     print("here is my secret from env var:", SECRET)
 
-    print("I also have imported pip package discord.py see `discord.__dir__()`:", discord.__dir__())
+    print("I also have imported pip package discord.py see `discord.__dir__()`:", dir(discord))
 
     print(f"And we currently are in {MODE} mode")
 
