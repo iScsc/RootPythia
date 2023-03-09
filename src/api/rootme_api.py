@@ -3,10 +3,10 @@ from os import getenv
 import requests
 import time
 
-class ApiRootMe() :
+class RootMeApi() :
     """
-    Class that takes care of sending the requests to the Root-me.org API
-    These functions should not be launched into separate threads in order to avoid being banned by the API (As long as a proper rate limiting design hasn't been implemented) 
+    Class that provides information fetched from the Root-me.org API
+     -> needs a rate_limiter object to send all the requests at a maximum rate of 25 req/sec
     """
 
     def __init__(self) :
