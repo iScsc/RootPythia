@@ -1,14 +1,20 @@
 from os import getenv
 from PIL import Image,ImageDraw,ImageFont
 
-from classes.challenge import Challenge
-from classes.user import User
-
 class NewValidatedChallenge() :
+    """
+    Class that creates an image when initialized
+    """
 
     def __init__(self,user,challenge,order) -> None:
-        self.assets_path = getenv("PYTHONPATH")+"/assets"
-        self.image = Image.open(self.assets_path+"/bg_dark.jpg") #take the background picture for base
+        #load PYTHONPATH to get the assets path
+        if (getenv("PYTHONPATH")!=None) :
+            self.assets_path = getenv("PYTHONPATH")+"/assets"
+        else :
+            raise Exception("PYTHONPATH env variable not set")
+        #take the background picture for base
+        self.image = Image.open(self.assets_path+"/bg_dark.jpg") 
+        # fill the picture
         self.make_title()
         self.make_profile(user)
         self.make_challenge(challenge)
@@ -16,6 +22,7 @@ class NewValidatedChallenge() :
         self.make_order(order)
 
     def make_title(self) :
+        # print the title of the picture
         draw = ImageDraw.Draw(self.image)
         font_title = ImageFont.truetype(self.assets_path+"/fonts/Staatliches.ttf",48)
         draw.text((60,25), "Nouveau Challenge Validé", fill=(245, 117, 32), font=font_title)
@@ -72,13 +79,4 @@ class NewValidatedChallenge() :
             pp = pp.resize((100,100))
             alpha.paste(pp,(550,80),pp)
             self.image = Image.alpha_composite(self.image.convert("RGBA"),alpha)
-        
 
-
-
-
-user = User(471176,"Xlitoni",5660,733)
-chall = Challenge(5,"HTML - Code Source","web-serveur","Rien de bien difficile",5,"Très facile")
-new_chall_obj = NewValidatedChallenge(user,chall,1)
-
-new_chall_obj.image.save("output.png")
