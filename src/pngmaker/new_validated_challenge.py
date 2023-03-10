@@ -8,12 +8,12 @@ class NewValidatedChallenge() :
 
     def __init__(self,user,challenge,order) -> None:
         #load PYTHONPATH to get the assets path
-        if (getenv("PYTHONPATH")!=None) :
+        if getenv("PYTHONPATH") is not None :
             self.assets_path = getenv("PYTHONPATH")+"/assets"
         else :
             raise Exception("PYTHONPATH env variable not set")
         #take the background picture for base
-        self.image = Image.open(self.assets_path+"/bg_dark.jpg") 
+        self.image = Image.open(self.assets_path+"/bg_dark.jpg")
         # fill the picture
         self.make_title()
         self.make_profile(user)
@@ -30,7 +30,9 @@ class NewValidatedChallenge() :
     def make_profile(self,user) :
         # TODO : Make the profile pic dynamic according to the user
         alpha = Image.new("RGBA", self.image.size, (0,0,0,0))
-        pp = Image.open(self.assets_path+"/profile_pics/auton0.png") #this should be modified to a profile pic depending on the username (should obviously be fetched before being accessed)
+        #this should be modified to a profile pic depending on the username
+        pp = Image.open(self.assets_path+"/profile_pics/auton0.png")
+
         pp = pp.resize((50,50))
         alpha.paste(pp,(60,90),pp)
         self.image = Image.alpha_composite(self.image.convert("RGBA"),alpha)
@@ -41,7 +43,7 @@ class NewValidatedChallenge() :
         # print the score
         font_score = ImageFont.truetype(self.assets_path+"/fonts/ContrailOne.ttf",18)
         draw.text((120,118), "Score : "+str(user.score), fill=(130, 171, 167), font=font_score)
-    
+
     def make_challenge(self,challenge) :
         # print the challenge name
         draw = ImageDraw.Draw(self.image)
@@ -50,8 +52,9 @@ class NewValidatedChallenge() :
         chall_name_size = draw.textlength(challenge.title,font=font_title)
         # print the scoring of the chall
         font_score = ImageFont.truetype(self.assets_path+"/fonts/ContrailOne.ttf",24)
-        draw.text((60+20+int(chall_name_size),155), str(challenge.pts)+" points", fill=(130, 171, 167), font=font_score)
-        
+        score_pos = (60+20+int(chall_name_size),155)
+        draw.text(score_pos, str(challenge.pts)+" points", fill=(130, 171, 167), font=font_score)
+
     def make_challenge_category(self,challenge) :
         #print the category logo
         alpha = Image.new("RGBA", self.image.size, (0,0,0,0))
@@ -68,14 +71,14 @@ class NewValidatedChallenge() :
         # print the scoring of the chall
         draw = ImageDraw.Draw(self.image)
         font_score = ImageFont.truetype(self.assets_path+"/fonts/ContrailOne.ttf",20)
-        if (order==1) :
+        if order==1 :
             draw.text((60,240), "First Blood !", fill=(255, 0, 0), font=font_score)
         else :
             draw.text((60,240), f"{order}ème du serveur", fill=(130, 171, 167), font=font_score)
         # if first blood print the little blood drop (uh it hurts)
-        if (order==1) :
+        if order==1 :
             alpha = Image.new("RGBA", self.image.size, (0,0,0,0))
-            pp = Image.open(self.assets_path+"/firstblood.png") 
+            pp = Image.open(self.assets_path+"/firstblood.png")
             pp = pp.resize((100,100))
             alpha.paste(pp,(550,80),pp)
             self.image = Image.alpha_composite(self.image.convert("RGBA"),alpha)
