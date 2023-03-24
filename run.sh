@@ -1,21 +1,23 @@
 #!/bin/sh
 
+NAME="root-pythia"
+
 run__prod () {
 	# prod mode
-	docker build --file Dockerfile -t root-pythia:latest .
-	docker run --rm --interactive --tty --detach --env-file .env.prod root-pythia:latest
+	docker build --file Dockerfile -t ${NAME}:latest .
+	docker run --rm --interactive --tty --detach --env-file .env.prod ${NAME}:latest
 }
 
 run__dev () {
 	# dev mode
-	docker build --file Dockerfile.dev -t root-pythia-dev:latest .
-	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/root-pythia/src root-pythia-dev:latest
+	docker build --file Dockerfile.dev -t ${NAME}-dev:latest .
+	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/${NAME}/src ${NAME}-dev:latest
 }
 
 run__watch () {
 	# watch mode
-	docker build --file Dockerfile.watch -t root-pythia-watch:latest .
-	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/root-pythia/src root-pythia-watch:latest
+	docker build --file Dockerfile.watch -t ${NAME}-watch:latest .
+	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/${NAME}/src ${NAME}-watch:latest
 }
 
 run() {
