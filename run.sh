@@ -3,7 +3,7 @@
 run__prod () {
 	# prod mode
 	docker build --file Dockerfile -t root-pythia:latest .
-	docker run --rm --interactive --tty --env-file .env.prod root-pythia:latest
+	docker run --rm --interactive --tty --detach --env-file .env.prod root-pythia:latest
 }
 
 run__dev () {
