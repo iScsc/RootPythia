@@ -28,15 +28,17 @@ class RateLimiter() :
 
     async def handle_requests(self) :
         print(f"Starting rate_limiter task...")
+        last_time_request = datetime.now()
         while True :
             #take a new request from the queue
             request = await self.queue.get()
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Treating item in queue : {request.key} -> {request.url} + {request.cookies} ")
 
             # wait 50ms for rate limitation purpose ;)
-            await asyncio.sleep(0.050)
+            await asyncio.sleep(0.050 - (datetime.now() - last_time_request))
 
             if request.method == "GET" :
+                last_time_request = datetime.now()
                 resp = requests.get(request.url, cookies=request.cookies)
                 if resp.status_code != 200 :
                     raise Exception(f"GET {request.url} -> {resp.status_code}")
