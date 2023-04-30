@@ -1,17 +1,16 @@
-from os import getenv
+from os import path
 from PIL import Image,ImageDraw,ImageFont
+from classes.challenge import Challenge
+from classes.user import User
 
 class NewValidatedChallenge() :
     """
     Class that creates an image when initialized
     """
 
-    def __init__(self,user,challenge,order) -> None:
-        #load PYTHONPATH to get the assets path
-        if getenv("PYTHONPATH") is not None :
-            self.assets_path = getenv("PYTHONPATH")+"/assets"
-        else :
-            raise Exception("PYTHONPATH env variable not set")
+    def __init__(self, user: User, challenge: Challenge, order: int) -> None:
+        # set the asset path with relative path 
+        self.assets_path = path.dirname(__file__)+"/../assets"
         #take the background picture for base
         self.image = Image.open(self.assets_path+"/bg_dark.jpg")
         # fill the picture
