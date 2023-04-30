@@ -35,7 +35,8 @@ class RateLimiter() :
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Treating item in queue : {request.key} -> {request.url} + {request.cookies} ")
 
             # wait 50ms for rate limitation purpose ;)
-            await asyncio.sleep(0.050 - (datetime.now() - last_time_request))
+            if 0.050 - (datetime.now() - last_time_request) > 0.01 :
+                await asyncio.sleep(0.050 - (datetime.now() - last_time_request))
 
             if request.method == "GET" :
                 last_time_request = datetime.now()
