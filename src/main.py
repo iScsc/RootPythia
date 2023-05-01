@@ -1,9 +1,10 @@
 from os import getenv
+import discord
+
 from classes.challenge import Challenge
 from classes.user import User
 from pngmaker.new_validated_challenge import NewValidatedChallenge
 
-import discord
 
 SECRET = getenv('USELESS_SECRET')
 MODE = getenv('MODE')

@@ -1,4 +1,4 @@
-class User(object) :
+class User() :
     """Class for user object"""
     def __init__(self,idx: int,username: str,score :int,rank: int) -> None:
         self.idx = idx

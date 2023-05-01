@@ -9,7 +9,7 @@ class NewValidatedChallenge() :
     """
 
     def __init__(self, user: User, challenge: Challenge, order: int) -> None:
-        # set the asset path with relative path 
+        # set the asset path with relative path
         self.assets_path = path.dirname(__file__)+"/../assets"
         #take the background picture for base
         self.image = Image.open(self.assets_path+"/bg_dark.jpg")
@@ -81,4 +81,3 @@ class NewValidatedChallenge() :
             pp = pp.resize((100,100))
             alpha.paste(pp,(550,80),pp)
             self.image = Image.alpha_composite(self.image.convert("RGBA"),alpha)
-
