@@ -24,7 +24,9 @@ class RootMeApi() :
         -> returns the raw json for now
         """
         #use the api_key in the cookies
-        cookies = {"api_key": self.API_KEY.strip('"') }
+        cookies = {
+            "api_key": self.API_KEY.strip('"')
+            }
         # ask the rate limiter for the request
         data = await self.rate_limiter.make_request(f"{self.API_URL}/challenges/{_id}",cookies,"GET")
         return data

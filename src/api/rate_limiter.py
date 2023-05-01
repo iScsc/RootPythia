@@ -7,7 +7,7 @@ import requests
 
 
 
-class RequestEntry(object) :
+class RequestEntry() :
     """
     Class for request object to put in the queue for the rate limiter
     """
@@ -79,7 +79,10 @@ class RateLimiter() :
                         retry = True
                         retry_count += 1
                     else :
-                        logging.error("Failed to get request after %s attempt. We could be banned :(",self._max_retry)
+                        logging.error(
+                            "Failed to get request after %s attempt. We could be banned :(",
+                            self._max_retry
+                            )
                         raise RuntimeError("Looks like a ban to me :'(")
                 else :
                     data = resp.json()
@@ -103,10 +106,9 @@ class RateLimiter() :
         request = RequestEntry(url, cookies, key, 'GET')
         await self.queue.put(request)
         await event.wait()
-        
+
         result = self.requests[key]['result']
-        
+
         del self.requests[key]
 
         return result
-

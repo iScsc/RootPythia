@@ -22,11 +22,11 @@ async def main():
     logging.info("Trying to log stuff")
 
     logging.debug("hello world from pyflag")
-    logging.debug("here is my secret from env var:", SECRET)
+    logging.debug("here is my secret from env var: %s", SECRET)
 
-    logging.debug("I also have imported pip package discord.py see `discord.__dir__()`:", dir(discord))
+    logging.debug("I also have imported pip package discord.py see `discord.__dir__()`:%s", str(dir(discord)))
 
-    logging.debug(f"And we currently are in {MODE} mode")
+    logging.debug("And we currently are in %s mode",str(MODE))
 
     rate_limiter = RateLimiter()
     ApiRootMe = RootMeApi(rate_limiter)
