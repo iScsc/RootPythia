@@ -1,11 +1,11 @@
 class Challenge():
     """Class for challenge object"""
-    def __init__(self, 
-                 idx: int, 
+    def __init__(self,
+                 idx: int,
                  title: str,
-                 category:str, 
-                 description: str, 
-                 pts: int, 
+                 category:str,
+                 description: str,
+                 pts: int,
                  difficulty: str):
         self.idx = idx
         self.title = title
