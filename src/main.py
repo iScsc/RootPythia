@@ -4,25 +4,33 @@ from api.rate_limiter import RateLimiter
 from api.rootme_api import RootMeApi
 
 import discord
+import logging
 import asyncio
+import time
 
 SECRET = getenv('USELESS_SECRET')
 MODE = getenv('MODE')
 
 async def main():
-    print("hello world from pyflag")
-    print("here is my secret from env var:", SECRET)
+    # Basic configuration (means its setup globally directly for the class logging)
+    # Could be fixed in the future if several logger are needed, then the format will have to be assigned to each logger
+    logging.basicConfig(level=logging.DEBUG,format='[%(asctime)s] %(levelname)s (%(filename)s) %(message)s')
+    logging.info("Trying to log stuff")
 
-    print("I also have imported pip package discord.py see `discord.__dir__()`:", dir(discord))
+    logging.debug("hello world from pyflag")
+    logging.debug("here is my secret from env var:", SECRET)
 
-    print(f"And we currently are in {MODE} mode")
+    logging.debug("I also have imported pip package discord.py see `discord.__dir__()`:", dir(discord))
 
+    logging.debug(f"And we currently are in {MODE} mode")
+    
     rate_limiter = RateLimiter()
     ApiRootMe = RootMeApi(rate_limiter)
     data_test = await ApiRootMe.GetChallengeById(5)
-    print(data_test)
+    logging.debug(data_test)
     data_test = await ApiRootMe.GetUserById(471176)
-    print(data_test)
+    logging.debug(data_test)
+    
 
 
 

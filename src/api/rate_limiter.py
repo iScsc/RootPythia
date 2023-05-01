@@ -1,5 +1,6 @@
 import asyncio
 import requests
+import logging
 import uuid
 
 from datetime import datetime
@@ -36,7 +37,7 @@ class RateLimiter() :
 
 
     async def handle_requests(self) :
-        print(f"Starting rate_limiter task...")
+        logging.info(f"Starting rate_limiter task...")
         
         #local variable
         last_time_request = datetime.now()
@@ -47,11 +48,11 @@ class RateLimiter() :
             #take a new request from the queue
             if retry :
                 #request stays the same
-                print(f"[{datetime.now().strftime('%H:%M:%S')}] Retrying {retry_count} item in queue : {request.key} -> {request.url} + {request.cookies} ")
+                logging.debug(f"Retrying {retry_count} item in queue : {request.key} -> {request.url} + {request.cookies} ")
                 retry = False
             else :
                 request = await self.queue.get()
-                print(f"[{datetime.now().strftime('%H:%M:%S')}] Treating item in queue : {request.key} -> {request.url} + {request.cookies} ")
+                logging.debug(f"Treating item in queue : {request.key} -> {request.url} + {request.cookies} ")
                 retry_count = 0
 
             # wait 50ms for rate limitation purpose ;)
@@ -64,11 +65,12 @@ class RateLimiter() :
                 # actually send the GET request
                 resp = requests.get(request.url, cookies=request.cookies)
                 if resp.status_code != 200 :
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] Request : GET {request.url} + {request.cookies} failed with response code {resp.status_code}")
+                    logging.warning(f"Request : GET {request.url} + {request.cookies} failed with response code {resp.status_code}")
                     if retry_count < self._max_retry :
                         retry = True
                         retry_count += 1
                     else :
+                        logging.error(f"Failed to get request after {self._max_retry} attempt. We could be banned :(")
                         raise Exception("Looks like a ban to me :'(")
                 else :     
                     data = resp.json()
@@ -84,7 +86,7 @@ class RateLimiter() :
     async def make_request(self,url,cookies,method) :
         key = uuid.uuid4().hex
 
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] Request for {url} added to queue -> {key}")
+        logging.debug(f"Request for {url} added to queue -> {key}")
 
         event = asyncio.Event()
         self.requests[key] = {}
