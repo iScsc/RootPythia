@@ -1,5 +1,5 @@
 [MASTER]
-init-hook="from pylint.config import find_pylintrc; from os import path; path.join(os.path.dirname(find_pylintrc()),'./src')"
+init-hook="from pylint.config import find_pylintrc; from os import path; path.join(path.dirname(find_pylintrc()),'./src')"
 
 [MAIN]
 
