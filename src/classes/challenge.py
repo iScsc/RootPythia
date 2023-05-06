@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 class Challenge():
     """Class for challenge object"""
     def __init__(self,
