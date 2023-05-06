@@ -5,7 +5,7 @@ from datetime import datetime
 from os import getenv
 import requests
 
-
+DEFAULT_MAX_RETRY = 3
 
 class RequestEntry() :
     """
@@ -22,7 +22,6 @@ class RateLimiter() :
     Class that takes care of sending the requests at a maximum rate (25/sec) 
         and giving back the result to the calling functions when it is received (async probably)
     """
-    _max_retry = 0
 
     def __init__(self) :
         self.requests = {}
@@ -31,7 +30,7 @@ class RateLimiter() :
         if getenv("MAX_API_RETRY") is not None :
             self._max_retry = int(getenv("MAX_API_RETRY"))
         else :
-            self._max_retry = 3
+            self._max_retry = DEFAULT_MAX_RETRY
 
         asyncio.create_task(self.handle_requests())
 
