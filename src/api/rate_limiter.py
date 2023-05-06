@@ -61,8 +61,9 @@ class RateLimiter() :
                 retry = False
 
             # wait 50ms for rate limitation purpose ;)
-            if (0.050 - (datetime.now() - last_time_request).total_seconds()) > 0.01 :
-                await asyncio.sleep(0.050 - (datetime.now() - last_time_request).total_seconds())
+            loop_duration = (datetime.now() - last_time_request).total_seconds()
+            if (0.050 - loop_duration) > 0.01 :
+                await asyncio.sleep(0.050 - loop_duration)
 
             if request.method == "GET" :
                 # keep track of the last time a request was made
