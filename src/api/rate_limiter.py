@@ -17,7 +17,7 @@ class RequestEntry() :
         self.key = key
         self.method = method
 
-# pylint: disable=too-fex-public-methods
+# pylint: disable=too-few-public-methods
 class RateLimiter() :
     """
     Class that takes care of sending the requests at a maximum rate (25/sec) 
