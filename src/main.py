@@ -1,9 +1,9 @@
 from os import getenv
 import discord
 
-from classes.challenge import Challenge
-from classes.user import User
-from pngmaker.new_validated_challenge import NewValidatedChallenge
+from src.classes.challenge import Challenge
+from src.classes.user import User
+from src.pngmaker.new_validated_challenge import NewValidatedChallenge
 
 
 SECRET = getenv('USELESS_SECRET')
