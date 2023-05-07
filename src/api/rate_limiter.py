@@ -7,6 +7,7 @@ import requests
 
 DEFAULT_MAX_RETRY = 3
 
+# pylint: disable=too-few-public-methods
 class RequestEntry() :
     """
     Class for request object to put in the queue for the rate limiter
@@ -17,7 +18,6 @@ class RequestEntry() :
         self.key = key
         self.method = method
 
-# pylint: disable=too-few-public-methods
 class RateLimiter() :
     """
     Class that takes care of sending the requests at a maximum rate (25/sec) 
