@@ -3,8 +3,8 @@ import asyncio
 import logging
 import discord
 
-from api.rate_limiter import RateLimiter
-from api.rootme_api import RootMeApi
+from src.api.rate_limiter import RateLimiter
+from src.api.rootme_api import RootMeApi
 
 
 
