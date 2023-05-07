@@ -1,5 +1,5 @@
 from os import getenv
-from api.rate_limiter import RateLimiter
+from src.api.rate_limiter import RateLimiter
 
 class RootMeApi() :
     """
@@ -28,7 +28,9 @@ class RootMeApi() :
             "api_key": self.API_KEY.strip('"')
             }
         # ask the rate limiter for the request
-        data = await self.rate_limiter.make_request(f"{self.API_URL}/challenges/{_id}",cookies,"GET")
+        data = await self.rate_limiter.make_request(
+            f"{self.API_URL}/challenges/{_id}",cookies,"GET"
+            )
         return data
 
     async def GetUserById(self,_id) :

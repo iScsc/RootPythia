@@ -1,11 +1,12 @@
 from os import getenv
+import asyncio
+import logging
+import discord
 
 from api.rate_limiter import RateLimiter
 from api.rootme_api import RootMeApi
 
-import asyncio
-import logging
-import discord
+
 
 SECRET = getenv('USELESS_SECRET')
 MODE = getenv('MODE')
@@ -24,7 +25,8 @@ async def main():
     logging.debug("hello world from pyflag")
     logging.debug("here is my secret from env var: %s", SECRET)
 
-    logging.debug("I also have imported pip package discord.py see `discord.__dir__()`:%s", str(dir(discord)))
+    logging.debug("I also have imported pip package discord.py see `discord.__dir__()`:%s",
+                   str(dir(discord)))
 
     logging.debug("And we currently are in %s mode",str(MODE))
 
