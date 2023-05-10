@@ -1,5 +1,5 @@
 from os import getenv
-from src.api.rate_limiter import RateLimiter
+from api.rate_limiter import RateLimiter
 
 class RootMeApi() :
     """
