@@ -3,10 +3,11 @@ import asyncio
 import logging
 import discord
 
+from classes.challenge import Challenge
+from classes.user import User
+from pngmaker.new_validated_challenge import NewValidatedChallenge
 from src.api.rate_limiter import RateLimiter
 from src.api.rootme_api import RootMeApi
-
-
 
 SECRET = getenv('USELESS_SECRET')
 MODE = getenv('MODE')
@@ -38,6 +39,10 @@ async def main():
     logging.debug(data_test)
 
 
+    chall = Challenge(5,"HTML - Code source","web-serveur","",5,"very easy")
+    xlitoni = User(478523,"Xlitoni",5660,1)
+    png_chall = NewValidatedChallenge(xlitoni,chall,1)
+    png_chall.image.save("example_png_first_blood.png")
 
 
 if __name__ == '__main__':
