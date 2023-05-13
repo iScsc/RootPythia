@@ -1,3 +1,6 @@
+[MASTER]
+init-hook="from pylint.config import find_pylintrc; import sys; from os import path; sys.path.append(path.join(path.dirname(find_pylintrc()),'./src'))"
+
 [MAIN]
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
@@ -441,9 +444,7 @@ timeout-methods=requests.api.delete,requests.api.get,requests.api.head,requests.
 [MISCELLANEOUS]
 
 # List of note tags to take in consideration, separated by a comma.
-notes=FIXME,
-      XXX,
-      TODO
+notes=
 
 # Regular expression of note tags to take in consideration.
 notes-rgx=
