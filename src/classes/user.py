@@ -1,3 +1,6 @@
+class InvalidUserData(Exception):
+    pass
+
 class User() :
     """Class for the User object"""
     def __init__(self, data: dict):
@@ -53,8 +56,12 @@ class User() :
 
     def update_new_solves(self, raw_user_data):
         parsed_data = User.parse_rootme_user_data(raw_user_data)
+        parsed_nb_solves = parsed_data["nb_solves"]
 
-        self.nb_new_solves = parsed_data["nb_solves"] - self.nb_solves
+        self.nb_new_solves = parsed_nb_solves - self.nb_solves
+        if self.nb_new_solves < 0:
+            self.nb_new_solves = 0
+            raise InvalidUserData(f"user {self.idx} as a negative number of new solves: before update={self.nb_solves}; after={parsed_nb_solves}")
 
     def yield_new_solves(self, raw_user_data):
         solves_id_iterator = User.parse_rootme_user_solves_and_yield(raw_user_data)
