@@ -43,7 +43,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     @commands.command(name='adduser')
     async def add_user(self, ctx, id: int):
         user = await self.dbmanager.add_user(id)
-        self.logger.debug("With id:'%s', received from the DB Manager: '%s'", id, truncate(user))
-        await ctx.message.channel.send(f"{user['nom']} {user['id_auteur']} added!\nPoints: {user['score']}\n<some stats>")
+        self.logger.debug("With id:'%s', received from the DB Manager: '%s'", id, user)
+        await ctx.message.channel.send(f"{user.username} {user.idx} added!\nPoints: {user.score}\n<some stats>")
 
     # TODO: add a loop for checking new solves, this calls the DB that calls the API with all the users

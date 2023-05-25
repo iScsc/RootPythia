@@ -8,10 +8,10 @@ class User() :
             score :int,
             rank: int
         """
-        parsed_data = parse_rootme_user_data(data)
+        parsed_data = User.parse_rootme_user_data(data)
         (self.idx, self.username, self.score, self.rank) = parsed_data
 
-    @classmethod
+    @staticmethod
     def parse_rootme_user_data(data):
         """A static method that returns a tuple of few user data extracted from raw RootMe API data"""
 
@@ -21,3 +21,6 @@ class User() :
         rank = int(data["position"])
 
         return (idx, username, score, rank)
+
+    def __repr__(self):
+        return f"User: id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}"

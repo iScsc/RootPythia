@@ -13,10 +13,10 @@ class Challenge():
         """
         self.idx = challenge_id
 
-        parsed_data = parse_rootme_challenge_data(data)
+        parsed_data = Challenge.parse_rootme_challenge_data(data)
         (self.author_id, self.title, self.category, self.description, self.pts, self.difficulty) = parsed_data
 
-    @classmethod
+    @staticmethod
     def parse_rootme_challenge_data(data):
         """A static method that returns a tuple of few challenge data extracted from raw RootMe API data"""
 
@@ -33,3 +33,6 @@ class Challenge():
         difficulty = data["difficulte"]
 
         return (author_id, title, category, description, pts, difficulty)
+
+    def __repr__(self):
+        return f"Challenge: id={self.idx}, author ID={self.author_id}, title={self.title}, category={self.category}, description={self.description}, points={self.pts}, difficulty={self.difficulty}"
