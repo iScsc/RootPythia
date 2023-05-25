@@ -1,8 +1,23 @@
 # pylint: disable=too-few-public-methods
 class User() :
-    """Class for user object"""
-    def __init__(self,idx: int,username: str,score :int,rank: int) -> None:
-        self.idx = idx
-        self.username = username
-        self.score = score
-        self.rank = rank
+    """Class for the User object"""
+    def __init__(self, data: dict):
+        """
+            idx: int,
+            username: str,
+            score :int,
+            rank: int
+        """
+        parsed_data = parse_rootme_user_data(data)
+        (self.idx, self.username, self.score, self.rank) = parsed_data
+
+    @classmethod
+    def parse_rootme_user_data(data):
+        """A static method that returns a tuple of few user data extracted from raw RootMe API data"""
+
+        idx = int(data["id_auteur"])
+        username = data["nom"]
+        score = int(data["score"])
+        rank = int(data["position"])
+
+        return (idx, username, score, rank)
