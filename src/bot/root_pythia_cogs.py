@@ -41,9 +41,14 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     # TODO: add a add_users command that would accept a list of ids
     @commands.command(name='adduser')
-    async def add_user(self, ctx, id: int):
-        user = await self.dbmanager.add_user(id)
-        self.logger.debug("With id:'%s', received from the DB Manager: '%s'", id, user)
+    async def add_user(self, ctx, idx: int):
+        user = await self.dbmanager.add_user(idx)
+
+        if user is None:
+            await ctx.message.channel.send(f"User {idx} already exists in database")
+            return
+
+        self.logger.debug("Added user: '%s'", user)
         await ctx.message.channel.send(f"{user.username} {user.idx} added!\nPoints: {user.score}\n<some stats>")
 
     # TODO: add a loop for checking new solves, this calls the DB that calls the API with all the users
