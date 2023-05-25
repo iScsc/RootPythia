@@ -4,8 +4,10 @@ import logging
 import discord
 from discord.ext import commands
 
+from api.rootme_api import RootMeApi
+from api.rate_limiter import RateLimiter
 from bot.root_pythia_cogs import RootPythiaCommands
-from bot.dummy_db_manager import DummyAPIManager, DummyDBManager
+from bot.dummy_db_manager import DummyDBManager
 
 
 """The bot module, which handles discord interface"""
@@ -39,7 +41,7 @@ _INTENTS = craft_intents()
 
 BOT = commands.Bot(command_prefix=_PREFIX, description=_DESCRIPTION, intents=_INTENTS)
 
-# Create Bot loown logger, each Cog will also have its own
+# Create Bot own logger, each Cog will also have its own
 BOT.logger = logging.getLogger(__name__)
 
 
@@ -50,9 +52,15 @@ async def on_ready():
     # is this call secure??
     logging.debug("channel id: %s", CHANNEL_ID)
 
-    # Create DB Manager and API Manager objects
-    api_manager = DummyAPIManager()
+    # Create Rate Limiter, API Manager, and DB Manager objects
+    rate_limiter = RateLimiter()
+    api_manager = RootMeApi(rate_limiter)
     db_manager = DummyDBManager(api_manager)
+
+    #data_test = await api_manager.GetChallengeById(5)
+    #BOT.logger.debug(data_test)
+    #data_test = await api_manager.GetUserById(471176)
+    #BOT.logger.debug(data_test)
 
     # Fetch main channel and send initialization message
     BOT.channel = await BOT.fetch_channel(CHANNEL_ID)
