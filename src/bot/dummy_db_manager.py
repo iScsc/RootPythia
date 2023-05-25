@@ -1,23 +1,10 @@
-class DummyUser:
-    def __init__(self, id):
-        self.id = id
-        self.points = 0
-        self.name = "dummy_user_"+str(id)
-        self.solves = ["super dur challenge", "challenge moyen", "HTML - boutons désactivés"]
-
-class DummyAPIManager:
-    def __init__(self):
-        pass
-    def get_rootme_user(self, id):
-        return DummyUser(id)
-
 class DummyDBManager:
     def __init__(self, api_manager):
         self.users = []
         self.api_manager = api_manager
     
     def add_user(self, id):
-        user = self.api_manager.get_rootme_user(id)
+        user = self.api_manager.get_user_by_id(id)
         self.users.append(user)
         return user
 
