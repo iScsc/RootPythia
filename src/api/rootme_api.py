@@ -1,7 +1,7 @@
 from os import getenv
 from api.rate_limiter import RateLimiter
 
-class RootMeApi() :
+class RootMeAPIManager() :
     """
     Class that provides information fetched from the Root-me.org API
      -> needs a rate_limiter object to send all the requests at a maximum rate of 25 req/sec
@@ -18,7 +18,7 @@ class RootMeApi() :
             raise RuntimeError("API_URL is not set.")
         self.rate_limiter = rate_limiter
 
-    async def GetChallengeById(self,_id) :
+    async def get_challenge_by_id(self,_id) :
         """
         Get a challenge from the API
         -> returns the raw json for now
@@ -33,7 +33,7 @@ class RootMeApi() :
             )
         return data
 
-    async def GetUserById(self,_id) :
+    async def get_user_by_id(self,_id) :
         """
         Get a user from the API
         -> returns the raw json for now

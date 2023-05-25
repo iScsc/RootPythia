@@ -4,7 +4,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from api.rootme_api import RootMeApi
+from api.rootme_api import RootMeAPIManager
 from api.rate_limiter import RateLimiter
 from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
@@ -54,13 +54,8 @@ async def on_ready():
 
     # Create Rate Limiter, API Manager, and DB Manager objects
     rate_limiter = RateLimiter()
-    api_manager = RootMeApi(rate_limiter)
+    api_manager = RootMeAPIManager(rate_limiter)
     db_manager = DummyDBManager(api_manager)
-
-    #data_test = await api_manager.GetChallengeById(5)
-    #BOT.logger.debug(data_test)
-    #data_test = await api_manager.GetUserById(471176)
-    #BOT.logger.debug(data_test)
 
     # Fetch main channel and send initialization message
     BOT.channel = await BOT.fetch_channel(CHANNEL_ID)
