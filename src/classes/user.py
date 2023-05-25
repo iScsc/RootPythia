@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 class User() :
     """Class for the User object"""
     def __init__(self, data: dict):
@@ -34,6 +33,21 @@ class User() :
         keys = User.keys()
         return {keys[0]: idx, keys[1]: username, keys[2]: score, keys[3]: rank, keys[4]: nb_solves}
 
+    @staticmethod
+    def parse_rootme_user_solves_and_yield(data):
+        validations = data["validations"]
+
+        # This iterator yields ALL solves, not only new ones
+        global_solves_iterator = iter(validations)
+
+        while True:
+            try:
+                solve = next(global_solves_iterator)
+                solve_id = int(solve["id_challenge"])
+                yield solve_id
+            except StopIteration:
+                break
+
     def __repr__(self):
         return f"User: id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves}"
 
@@ -41,6 +55,16 @@ class User() :
         parsed_data = User.parse_rootme_user_data(raw_user_data)
 
         self.nb_new_solves = parsed_data["nb_solves"] - self.nb_solves
+
+    def yield_new_solves(self, raw_user_data):
+        solves_id_iterator = User.parse_rootme_user_solves_and_yield(raw_user_data)
+
+        # restrict to the first elements => latest solves => new solves
+        for i in range(self.nb_new_solves):
+            yield next(solves_id_iterator)
+
+        self.nb_solves += self.nb_new_solves
+        self.nb_new_solves = 0
 
     def has_new_solves(self):
         return self.nb_new_solves != 0
