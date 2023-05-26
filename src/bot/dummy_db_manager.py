@@ -1,10 +1,14 @@
+import logging
+
 from classes.user import User
 
 class DummyDBManager:
     def __init__(self, api_manager):
         self.users = []
         self.api_manager = api_manager
-    
+
+        self.logger = logging.getLogger(__name__)
+
     async def add_user(self, idx):
         """Call the API Manager to get a user by his id then create a User object and store it"""
 
