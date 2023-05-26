@@ -3,25 +3,13 @@ import logging
 from discord.ext import commands, tasks
 
 NAME = "RootPythiaCommands"
-LOG_STR_LEN_LIMIT = 600
-TRUNCATE = True
-
-# FIXME: c'est degueu faut intégrer ca au formatter du root logger je pense
-def truncate(data):
-    if not TRUNCATE:
-        return data
-    str_data = str(data)
-    if len(str_data) > LOG_STR_LEN_LIMIT:
-        if len(str_data) > LOG_STR_LEN_LIMIT + 60:
-            return str_data[:600] + " ...[TRUNCATED]... " + str_data[-40:]
-    return str_data
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at the bot init"""
 
     def __init__(self, bot, dbmanager):
         self.bot = bot
-        self.logger = logging.getLogger(self.qualified_name)
+        self.logger = logging.getLogger(__name__)
         self.dbmanager = dbmanager
 
         self.check_new_solves.start()
