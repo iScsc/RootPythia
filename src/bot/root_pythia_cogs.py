@@ -45,16 +45,16 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         user = await self.dbmanager.add_user(idx)
 
         if user is None:
-            await ctx.message.channel.send(f"User {idx} already exists in database")
+            await ctx.message.channel.send(f"UserID {idx} already exists in database")
             return
 
-        self.logger.debug("Added user: '%s'", user)
+        self.logger.debug("Add user: '%s'", repr(user))
         await ctx.message.channel.send(f"{user.username} {user.idx} added!\nPoints: {user.score}")
 
     @commands.command(name='getuser')
     async def get_user(self, ctx, idx: int):
         user = self.dbmanager.get_user(idx)
-        self.logger.debug("Get user '%s' for id=%d", user, idx)
+        self.logger.debug("Get user '%s' for id=%d", repr(user), idx)
         await ctx.message.channel.send(f"{user.username} {user.idx} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>")
 
     # TODO: add a loop for checking new solves, this calls the DB that calls the API with all the users

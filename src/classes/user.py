@@ -54,6 +54,9 @@ class User() :
     def __repr__(self):
         return f"User: id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves}"
 
+    def __str__(self):
+        return f"{self.username} #{self.idx}"
+
     def update_new_solves(self, raw_user_data):
         parsed_data = User.parse_rootme_user_data(raw_user_data)
         parsed_nb_solves = parsed_data["nb_solves"]
