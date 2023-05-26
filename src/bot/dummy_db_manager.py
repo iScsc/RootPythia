@@ -1,6 +1,7 @@
 import logging
 
 from classes.user import User
+from classes.challenge import Challenge
 
 class DummyDBManager:
     def __init__(self, api_manager):
@@ -31,3 +32,22 @@ class DummyDBManager:
     
     def get_users(self):
         return self.users
+
+    async def fetch_user_new_solves(self, idx):
+        user = self.get_user(idx)
+        if user is None:
+            # TODO: add a specialized Exception
+            raise Exception(f"User '{idx}' not in database")
+
+        raw_user_data = await self.api_manager.get_user_by_id(idx)
+        user.update_new_solves(raw_user_data)
+        if not user.has_new_solves():
+            self.logger.debug("'%s' hasn't any new solves", user)
+            return
+
+        self.logger.debug("'%s' has new solves: %s", user, user.nb_new_solves)
+        for challenge_id in user.yield_new_solves(raw_user_data):
+            challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
+            challenge = Challenge(challenge_id, challenge_data)
+            self.logger.info("%s solved: %s", user, challenge)
+            yield repr(challenge)
