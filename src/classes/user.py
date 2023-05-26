@@ -67,6 +67,9 @@ class User() :
             raise InvalidUserData(f"user {self.idx} as a negative number of new solves: before update={self.nb_solves}; after={parsed_nb_solves}")
 
     def yield_new_solves(self, raw_user_data):
+        # FIXME: currently if it must yield several solves it yields the latest first so not in chronological solve order
+        # that shouldn't be a problem with regular checking (rarely someone flags twice in less than 1 minute)
+        # but if the new solves checking is less frequent (few minutes) it can happen
         solves_id_iterator = User.parse_rootme_user_solves_and_yield(raw_user_data)
 
         # restrict to the first elements => latest solves => new solves
