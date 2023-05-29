@@ -23,6 +23,9 @@ class User() :
     def keys():
         return ["idx", "username", "score", "rank", "nb_solves"]
 
+    # TODO: move these static methods to rootme_api, it make more sense
+    # or create a Parser object? we could then have a RootMeParser and a HTBParser 
+    # but then what's the point of the API Manager ?
     @staticmethod
     def parse_rootme_user_data(data):
         """A static method that returns a tuple of few user data extracted from raw RootMe API data"""
