@@ -39,7 +39,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             return
 
         self.logger.debug("Add user: '%s'", repr(user))
-        await ctx.message.channel.send(f"{user.username} {user.idx} added!\nPoints: {user.score}")
+        await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
 
     @commands.command(name='getuser')
     async def get_user(self, ctx, idx: int):
