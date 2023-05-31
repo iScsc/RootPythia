@@ -1,7 +1,11 @@
 import types
 
 import pytest
+import discord
+from discord.ext import commands
+import discord.ext.test as dpytest
 
+from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
 from data import auteurs_example_data, challenges_example_data
 
@@ -37,3 +41,19 @@ def mock_dummy_db_manager(mock_rootme_api_manager):
 
     db = DummyDBManager(rootme_api_manager)
     yield db
+
+
+
+@pytest.fixture
+async def config_bot(mock_dummy_db_manager):
+    intents = discord.Intents.default()
+    intents.members = True
+    intents.message_content = True
+    _bot = commands.Bot(command_prefix="!",
+                     intents=intents)
+    await _bot._async_setup_hook()
+    await _bot.add_cog(RootPythiaCommands(_bot, mock_dummy_db_manager))
+
+    dpytest.configure(_bot)
+
+    return _bot
