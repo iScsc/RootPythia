@@ -45,3 +45,14 @@ async def test_has_user(idx, expected, mock_dummy_db_manager):
     ret_value = db.has_user(idx)
 
     assert ret_value == expected
+
+
+@pytest.mark.asyncio
+async def test_get_user(mock_dummy_db_manager):
+    db = mock_dummy_db_manager
+
+    # Trigger test
+    added_user = await db.add_user(1)
+    got_user = db.get_user(1)
+
+    assert added_user is got_user
