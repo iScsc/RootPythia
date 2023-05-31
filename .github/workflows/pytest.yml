@@ -9,6 +9,8 @@ jobs:
   execute-pytest:
     runs-on: ubuntu-latest
     env:
+      # this one is hardcoded: (in run.sh in local dev mode)
+      PYTHONPATH: ./src
       MODE: test
     steps:
     - uses: actions/checkout@v3
