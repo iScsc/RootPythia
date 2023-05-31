@@ -27,3 +27,21 @@ async def test_double_add_user(mock_dummy_db_manager, mocker):
     ret_value = await db.add_user(1)
 
     assert ret_value is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "idx, expected",
+    [
+        (-1, False),
+        (1 , True ),
+    ]
+)
+async def test_has_user(idx, expected, mock_dummy_db_manager):
+    db = mock_dummy_db_manager
+
+    # Trigger test
+    await db.add_user(idx)
+    ret_value = db.has_user(idx)
+
+    assert ret_value == expected
