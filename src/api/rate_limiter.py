@@ -35,9 +35,10 @@ class RateLimiter() :
 
         asyncio.create_task(self.handle_requests())
 
+        self.logger = logging.getLogger(__name__)
 
     async def handle_requests(self) :
-        logging.info("Starting rate_limiter task...")
+        self.logger.info("Starting rate_limiter task...")
 
         #local variable
         last_time_request = datetime.now()
@@ -48,14 +49,14 @@ class RateLimiter() :
             #take a new request from the queue
             if not retry :
                 request = await self.queue.get()
-                logging.debug(
+                self.logger.debug(
                     "Treating item in queue : %s -> %s + %s ",
                     request.key,request.url,request.cookies
                     )
                 retry_count = 0
             else :
                 #request stays the same
-                logging.debug(
+                self.logger.debug(
                     "Retrying %s item in queue : %s -> %s + %s ",
                     retry_count,request.key,request.url,request.cookies
                     )
@@ -72,7 +73,7 @@ class RateLimiter() :
                 # actually send the GET request
                 resp = requests.get(request.url, cookies=request.cookies)
                 if resp.status_code != 200 :
-                    logging.warning(
+                    self.logger.warning(
                         "Request : GET %s + %s failed with response code %s",
                         request.url,request.cookies,resp.status_code
                         )
@@ -80,7 +81,7 @@ class RateLimiter() :
                         retry = True
                         retry_count += 1
                     else :
-                        logging.error(
+                        self.logger.error(
                             "Failed to get request after %s attempt. We could be banned :(",
                             self._max_retry
                             )
@@ -99,7 +100,7 @@ class RateLimiter() :
     async def make_request(self,url,cookies,method) :
         key = uuid.uuid4().hex
 
-        logging.debug("Request for %s added to queue -> %s",url,key)
+        self.logger.debug("Request for %s added to queue -> %s",url,key)
 
         event = asyncio.Event()
         self.requests[key] = {}
