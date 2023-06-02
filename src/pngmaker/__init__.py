@@ -1,0 +1,1 @@
+from pngmaker.new_validated_challenge import NewValidatedChallenge
