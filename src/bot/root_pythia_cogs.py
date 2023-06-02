@@ -1,6 +1,6 @@
 import logging
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 NAME = "RootPythiaCommands"
 LOG_STR_LEN_LIMIT = 600
@@ -23,6 +23,8 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.bot = bot
         self.logger = logging.getLogger(self.qualified_name)
         self.dbmanager = dbmanager
+
+        self.check_new_solves.start()
 
     # FIXME: this decorator won't work...
     def log_command_call(cmd):
@@ -57,4 +59,13 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.logger.debug("Get user '%s' for id=%d", repr(user), idx)
         await ctx.message.channel.send(f"{user.username} {user.idx} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>")
 
-    # TODO: add a loop for checking new solves, this calls the DB that calls the API with all the users
+    # TODO: make the resfresh delay configurable
+    @tasks.loop(seconds=10)
+    async def check_new_solves(self):
+        self.logger.info("Checking for new solves...")
+
+        users = self.dbmanager.get_users()
+        for user in users:
+            async for solve in self.dbmanager.fetch_user_new_solves(user.idx):
+                self.logger.debug("%s solved '%s'", user, solve)
+                await self.bot.channel.send(solve)
