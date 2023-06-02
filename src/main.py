@@ -3,7 +3,7 @@ import asyncio
 import logging
 import discord
 
-from bot.root_pythia_bot import BOT as root_pythia
+from bot import BOT as root_pythia
 
 MODE = getenv('MODE')
 DISCORD_TOKEN = getenv('DISCORD_TOKEN')
