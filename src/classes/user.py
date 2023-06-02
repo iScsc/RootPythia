@@ -55,7 +55,7 @@ class User() :
                 break
 
     def __repr__(self):
-        return f"User: id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves}"
+        return f"User(id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves})"
 
     def __str__(self):
         return f"{self.username} #{self.idx}"

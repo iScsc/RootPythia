@@ -35,4 +35,4 @@ class Challenge():
         return (author_id, title, category, description, pts, difficulty)
 
     def __repr__(self):
-        return f"Challenge: id={self.idx}, author ID={self.author_id}, title={self.title}, category={self.category}, description={self.description}, points={self.pts}, difficulty={self.difficulty}"
+        return f"Challenge(id={self.idx}, author ID={self.author_id}, title={self.title}, category={self.category}, description={self.description}, points={self.pts}, difficulty={self.difficulty})"
