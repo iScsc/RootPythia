@@ -38,7 +38,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             await ctx.message.channel.send(f"UserID {idx} already exists in database")
             return
 
-        self.logger.debug("Add user: '%s'", repr(user))
+        self.logger.info("Add user '%s'", user)
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
 
     @commands.command(name='getuser')
@@ -55,5 +55,5 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         users = self.dbmanager.get_users()
         for user in users:
             async for solve in self.dbmanager.fetch_user_new_solves(user.idx):
-                self.logger.debug("%s solved '%s'", user, solve)
+                self.logger.info("%s solved '%s'", user, solve)
                 await self.bot.channel.send(solve)

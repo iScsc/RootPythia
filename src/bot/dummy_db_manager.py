@@ -21,6 +21,7 @@ class DummyDBManager:
 
         user = User(raw_user_data)
         self.users.append(user)
+        self.logger.debug("add user '%s'", repr(user))
         return user
 
     def has_user(self, idx):
@@ -45,9 +46,9 @@ class DummyDBManager:
             self.logger.debug("'%s' hasn't any new solves", user)
             return
 
-        self.logger.debug("'%s' has new solves: %s", user, user.nb_new_solves)
+        self.logger.info("'%s' has new %s solves", user, user.nb_new_solves)
         for challenge_id in user.yield_new_solves(raw_user_data):
             challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
             challenge = Challenge(challenge_id, challenge_data)
-            self.logger.info("%s solved: %s", user, challenge)
+            self.logger.debug("'%s' solved '%s'", repr(user), repr(challenge))
             yield repr(challenge)
