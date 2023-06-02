@@ -1,7 +1,7 @@
 from os import path
 from PIL import Image,ImageDraw,ImageFont
-from classes.challenge import Challenge
-from classes.user import User
+from classes import Challenge
+from classes import User
 
 class NewValidatedChallenge() :
     """

@@ -1,6 +1,6 @@
 import pytest
 
-from classes.user import User
+from classes import User
 
 
 @pytest.mark.asyncio

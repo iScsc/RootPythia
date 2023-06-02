@@ -1,7 +1,7 @@
 import logging
 
-from classes.user import User
-from classes.challenge import Challenge
+from classes import User
+from classes import Challenge
 
 class DummyDBManager:
     def __init__(self, api_manager):
