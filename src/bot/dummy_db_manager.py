@@ -51,4 +51,4 @@ class DummyDBManager:
             challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
             challenge = Challenge(challenge_id, challenge_data)
             self.logger.debug("'%s' solved '%s'", repr(user), repr(challenge))
-            yield repr(challenge)
+            yield challenge
