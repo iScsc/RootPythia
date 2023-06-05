@@ -35,7 +35,7 @@ def craft_intents():
 
 
 ########### Create bot object #################
-_DESCRIPTION = "<desc to be found>"
+_DESCRIPTION = "RootPythia is a Discord bot fetching RootMe API to notify everyone when a user solves a new challenge!"
 _PREFIX = "!"
 _INTENTS = craft_intents()
 
