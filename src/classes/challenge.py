@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 class Challenge():
     """Class for the Challenge object"""
     def __init__(self, challenge_id: int, data: dict):
