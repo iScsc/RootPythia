@@ -44,15 +44,11 @@ class User() :
         validations = data["validations"]
 
         # This iterator yields ALL solves, not only new ones
-        global_solves_iterator = iter(validations)
+        every_solve_iter = iter(validations)
 
-        while True:
-            try:
-                solve = next(global_solves_iterator)
-                solve_id = int(solve["id_challenge"])
-                yield solve_id
-            except StopIteration:
-                break
+        for solve in every_solve_iter:
+            solve_id = int(solve["id_challenge"])
+            yield solve_id
 
     def __repr__(self):
         return f"User(id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves})"
