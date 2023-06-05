@@ -46,7 +46,7 @@ class DummyDBManager:
             self.logger.debug("'%s' hasn't any new solves", user)
             return
 
-        self.logger.info("'%s' has new %s solves", user, user.nb_new_solves)
+        self.logger.info("'%s' has %s new solves", user, user.nb_new_solves)
         for challenge_id in user.yield_new_solves(raw_user_data):
             challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
             challenge = Challenge(challenge_id, challenge_data)
