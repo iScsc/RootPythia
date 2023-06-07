@@ -1,4 +1,5 @@
 import types
+import logging
 
 import pytest
 import pytest_asyncio
@@ -25,6 +26,21 @@ def demo_fixture():
     return obj
 
 
+@pytest.fixture
+def null_logger():
+    null_logger_name = "null_logger"
+    def create_null_logger():
+        logger = logging.getLogger(null_logger_name)
+        logger.handlers = [logging.NullHandler()]
+        logger.setLevel(logging.INFO)
+        logger.propagate = False # To not actually log the mock
+        return logger
+
+    _logger = logging.getLogger(null_logger_name)
+    _logger = _logger if _logger.handlers else create_null_logger()
+
+    yield _logger
+
 # the mocker fixture comes with pytest_mock plugin, see pytest_plugins above
 @pytest.fixture
 def mock_rootme_api_manager(mocker):
@@ -46,15 +62,20 @@ def mock_dummy_db_manager(mock_rootme_api_manager):
 
 # this pytest_asyncio decorator allows to automatically await async fixture before passing them to tests
 @pytest_asyncio.fixture
-async def config_bot(mock_dummy_db_manager):
+async def config_bot(mock_dummy_db_manager, null_logger):
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
     _bot = commands.Bot(command_prefix="!",
                      intents=intents)
+
+    _bot.logger = null_logger
+
     await _bot._async_setup_hook()
     await _bot.add_cog(RootPythiaCommands(_bot, mock_dummy_db_manager))
 
     dpytest.configure(_bot)
+
+    _bot.channel = next(_bot.get_all_channels())
 
     return _bot
