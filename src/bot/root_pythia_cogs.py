@@ -14,22 +14,25 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
         self.check_new_solves.start()
 
-    # FIXME: this decorator won't work...
-    def log_command_call(cmd):
-        async def log_it(self, ctx, *args, **kwargs):
-            self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
-            await cmd(self, ctx, *args, **kwargs)
-        return log_it
+    async def log_command_call(self, ctx):
+        # Maybe we should use the on_command event
+        # https://discordpy.readthedocs.io/en/stable/ext/commands/api.html?highlight=cog#discord.discord.ext.commands.on_command
+        # the logging would be implicit, no need of a redundant @commands.before_invoke(...) on each command
+        # But right now I prefer to stick with this explicit solution
+        self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
+    @commands.before_invoke(log_command_call)
     @commands.command(name='hey')
     async def hey(self, ctx):
         await ctx.message.channel.send("hey command works!!\nJust happy to be alive")
 
+    @commands.before_invoke(log_command_call)
     @commands.command(name='ping')
     async def ping(self, ctx):
         await ctx.message.channel.send("weird habit... but I guess: pong?...")
 
     # TODO: add a add_users command that would accept a list of ids
+    @commands.before_invoke(log_command_call)
     @commands.command(name='adduser')
     async def add_user(self, ctx, idx: int):
         user = await self.dbmanager.add_user(idx)
@@ -41,6 +44,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.logger.info("Add user '%s'", user)
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
 
+    @commands.before_invoke(log_command_call)
     @commands.command(name='getuser')
     async def get_user(self, ctx, idx: int):
         user = self.dbmanager.get_user(idx)
