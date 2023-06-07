@@ -3,7 +3,7 @@ import discord.ext.test as dpytest
 
 
 @pytest.mark.asyncio
-async def test_add_user_command(config_bot):
+async def test_adduser_command(config_bot):
     bot = config_bot
 
     # if the API Manager is not rightly mocked this test should fail, on purpose!
