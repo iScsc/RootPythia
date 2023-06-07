@@ -34,7 +34,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     # TODO: add a add_users command that would accept a list of ids
     @commands.before_invoke(log_command_call)
     @commands.command(name='adduser')
-    async def add_user(self, ctx, idx: int):
+    async def adduser(self, ctx, idx: int):
         user = await self.dbmanager.add_user(idx)
 
         if user is None:
@@ -46,7 +46,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @commands.before_invoke(log_command_call)
     @commands.command(name='getuser')
-    async def get_user(self, ctx, idx: int):
+    async def getuser(self, ctx, idx: int):
         user = self.dbmanager.get_user(idx)
 
         if user is None:
