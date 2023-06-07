@@ -72,4 +72,7 @@ async def on_error(event, *args, **kwargs):
         await BOT.close()
         exit(1)
     else:
-        BOT.logger.error("Unhandled error on '%s' event", event)
+        # maybe this call is too intrusive/verbose...
+        await BOT.channel.send(f"{event} event failed, please check logs for more details")
+
+        BOT.logger.exception("Unhandled exception in '%s' event", event)

@@ -21,6 +21,17 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # But right now I prefer to stick with this explicit solution
         self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        await ctx.send("Command failed, please check logs for more details")
+
+        # this dirty try + raise is mandatory because the exception stored in error has been captured
+        # by discord.py so sys.exc_info() is empty, we re aise it on purpose to log properly
+        try:
+            raise error
+        except:
+            self.logger.exception("'%s' command failed", ctx.command)
+
     @commands.before_invoke(log_command_call)
     @commands.command(name='hey')
     async def hey(self, ctx):
