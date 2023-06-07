@@ -4,8 +4,7 @@ import discord.ext.test as dpytest
 
 @pytest.mark.asyncio
 async def test_add_user_command(config_bot):
-    # we use (default) --asyncio-mode=strict so the config_bot coroutine must be awaited "by-hand"
-    bot = await config_bot
+    bot = config_bot
 
     # if the API Manager is not rightly mocked this test should fail, on purpose!
     # because the API Manager is mocked to always return data from tests/data/rootme_example_data no matter the id passed
@@ -18,7 +17,7 @@ async def test_getuser_command(config_bot):
     ###
     # comments are the same than for test_adduser_command you should check it out
     ###
-    bot = await config_bot
+    bot = config_bot
 
     await dpytest.message("!adduser 42")
     await dpytest.message("!getuser 1")
@@ -38,7 +37,7 @@ async def NOP_test_getuser_not_found(config_bot):
     ###
     # comments are the same than for test_adduser_command you should check it out
     ###
-    bot = await config_bot
+    bot = config_bot
 
     await dpytest.message("!getuser 42")
 

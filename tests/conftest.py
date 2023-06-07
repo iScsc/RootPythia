@@ -1,6 +1,7 @@
 import types
 
 import pytest
+import pytest_asyncio
 import discord
 from discord.ext import commands
 import discord.ext.test as dpytest
@@ -43,8 +44,8 @@ def mock_dummy_db_manager(mock_rootme_api_manager):
     yield db
 
 
-
-@pytest.fixture
+# this pytest_asyncio decorator allows to automatically await async fixture before passing them to tests
+@pytest_asyncio.fixture
 async def config_bot(mock_dummy_db_manager):
     intents = discord.Intents.default()
     intents.members = True
