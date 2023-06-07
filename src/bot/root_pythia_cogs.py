@@ -44,6 +44,10 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     @commands.command(name='getuser')
     async def get_user(self, ctx, idx: int):
         user = self.dbmanager.get_user(idx)
+        if user is None:
+            await ctx.message.channel.send(f"User id '{idx}' isn't in the database, you must add it first")
+            return
+
         self.logger.debug("Get user '%s' for id=%d", repr(user), idx)
         await ctx.message.channel.send(f"{user.username} {user.idx} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>")
 
