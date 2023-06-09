@@ -1,4 +1,4 @@
-from os import path
+import os
 from PIL import Image,ImageDraw,ImageFont
 from classes import Challenge
 from classes import User
@@ -8,9 +8,11 @@ class NewValidatedChallenge() :
     Class that creates an image when initialized
     """
 
+    NEW_SOLVE_PATH = "/tmp/new_solve.png"
+
     def __init__(self, user: User, challenge: Challenge, order: int) -> None:
         # set the asset path with relative path
-        self.assets_path = path.dirname(__file__)+"/../assets"
+        self.assets_path = os.path.dirname(__file__)+"/../assets"
         #take the background picture for base
         self.image = Image.open(self.assets_path+"/bg_dark.jpg")
         # fill the picture
@@ -19,6 +21,14 @@ class NewValidatedChallenge() :
         self.make_challenge(challenge)
         self.make_challenge_category(challenge)
         self.make_order(order)
+
+    def __enter__(self):
+        self.image.save(NewValidatedChallenge.NEW_SOLVE_PATH)
+
+        return NewValidatedChallenge.NEW_SOLVE_PATH
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.remove(NewValidatedChallenge.NEW_SOLVE_PATH)
 
     def make_title(self) :
         # print the title of the picture

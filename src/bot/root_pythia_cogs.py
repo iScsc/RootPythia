@@ -1,5 +1,4 @@
 import logging
-import os
 
 import discord
 from discord.ext import commands, tasks
@@ -7,7 +6,6 @@ from discord.ext import commands, tasks
 from pngmaker import NewValidatedChallenge
 
 NAME = "RootPythiaCommands"
-TMP_NEW_SOLVE_PATH = "/tmp/new_solve.png"
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at the bot init"""
@@ -80,16 +78,13 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
         users = self.dbmanager.get_users()
         for user in users:
-            async for solve in self.dbmanager.fetch_user_new_solves(user.idx):
-                self.logger.info("%s solved '%s'", user, solve)
+            async for solved_challenge in self.dbmanager.fetch_user_new_solves(user.idx):
+                self.logger.info("%s solved '%s'", user, solved_challenge)
 
+                # this context manager handles the file image creation and deletion
                 # TODO: change this hardcoded order=2 and create an is_first_blood or solved_rank method in DB Manager
-                # TODO: make a context manager to deal with the image saving to file and deleting
-                image = NewValidatedChallenge(user, solve, 2).image
-                image.save(TMP_NEW_SOLVE_PATH)
-                await self.bot.channel.send(file=discord.File(TMP_NEW_SOLVE_PATH))
-                self.logger.info(image)
-                os.remove(TMP_NEW_SOLVE_PATH)
+                with NewValidatedChallenge(user, solved_challenge, 2) as solve:
+                    await self.bot.channel.send(file=discord.File(solve))
 
     @check_new_solves.error
     async def loop_error_handler(self, exc):
