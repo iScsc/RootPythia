@@ -78,3 +78,11 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             async for solve in self.dbmanager.fetch_user_new_solves(user.idx):
                 self.logger.info("%s solved '%s'", user, solve)
                 await self.bot.channel.send(solve)
+
+    @check_new_solves.error
+    async def loop_error_handler(self, exc):
+        await self.bot.channel.send("check_new_solves loop failed, please check logs for more details")
+        # logging of the traceback is already handled by the asyncio package
+        self.logger.error("check_new_solves loop failed")
+
+        self.check_new_solves.restart()
