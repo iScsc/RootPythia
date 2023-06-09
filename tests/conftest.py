@@ -7,6 +7,7 @@ from discord.ext import commands
 import discord.ext.test as dpytest
 
 from bot.root_pythia_cogs import RootPythiaCommands
+from bot.root_pythia_cogs import NAME as COG_NAME
 from bot.dummy_db_manager import DummyDBManager
 from data import auteurs_example_data, challenges_example_data
 
@@ -14,7 +15,7 @@ from data import auteurs_example_data, challenges_example_data
 pytest_plugins = ["pytest_mock", "pytest_asyncio"]
 
 def pytest_configure():
-    pytest.dummy = "dummy global variable"
+    pytest.COG_NAME = COG_NAME
 
 
 @pytest.fixture
@@ -69,4 +70,10 @@ async def config_bot(mock_dummy_db_manager, null_logger):
 
     _bot.channel = next(_bot.get_all_channels())
 
-    return _bot
+    yield _bot
+
+    # empty message queue for future tests see https://github.com/CraftSpider/dpytest/issues/116
+    await dpytest.empty_queue()
+
+    # stop cog's loop to avoid an annoying error msg while the test is passing
+    _bot.get_cog(COG_NAME).check_new_solves.cancel()

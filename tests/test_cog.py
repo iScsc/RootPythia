@@ -27,13 +27,8 @@ async def test_getuser_command(config_bot):
     assert dpytest.verify().message().contains().content("Points: 3040")
 
 
-# FIXME: this test is currently disabled because of some weird message Queue not empty at test start
-# it seems to have remains of old messages from previous run tests.
-# the config_bot fixture is function scoped so this shouldn't be the same instance, the problem probably
-# roots deeper in some bad handling of coroutines and task loops but this is just an intuition, I openend #13
-# on the repo to track this
 @pytest.mark.asyncio
-async def NOP_test_getuser_not_found(config_bot):
+async def test_getuser_not_found(config_bot):
     ###
     # comments are the same than for test_adduser_command you should check it out
     ###
