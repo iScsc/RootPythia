@@ -26,7 +26,8 @@ class Challenge():
         author_id = int(main_author["id_auteur"])
 
         title = data["titre"]
-        category = data["rubrique"]
+        # parse the challenge category to ASCII character and better usability
+        category = data["rubrique"].lower().replace(" ", "").replace('\u00E9', 'e').replace('\u00E8', 'e')
         description = data["soustitre"]
         pts = int(data["score"])
         difficulty = data["difficulte"]
