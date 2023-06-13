@@ -1,15 +1,17 @@
 class InvalidUserData(Exception):
     pass
 
-class User() :
+
+class User:
     """Class for the User object"""
+
     def __init__(self, data: dict):
         """
-            idx: int,
-            username: str,
-            score :int,
-            rank: int,
-            solves: int,
+        idx: int,
+        username: str,
+        score :int,
+        rank: int,
+        solves: int,
         """
         parsed_data = User.parse_rootme_user_data(data)
 
@@ -24,7 +26,7 @@ class User() :
         return ["idx", "username", "score", "rank", "nb_solves"]
 
     # TODO: move these static methods to rootme_api, it make more sense
-    # or create a Parser object? we could then have a RootMeParser and a HTBParser 
+    # or create a Parser object? we could then have a RootMeParser and a HTBParser
     # but then what's the point of the API Manager ?
     @staticmethod
     def parse_rootme_user_data(data):
@@ -63,7 +65,9 @@ class User() :
         self.nb_new_solves = parsed_nb_solves - self.nb_solves
         if self.nb_new_solves < 0:
             self.nb_new_solves = 0
-            raise InvalidUserData(f"user {self.idx} as a negative number of new solves: before update={self.nb_solves}; after={parsed_nb_solves}")
+            raise InvalidUserData(
+                f"user {self.idx} as a negative number of new solves: before update={self.nb_solves}; after={parsed_nb_solves}"
+            )
 
     def yield_new_solves(self, raw_user_data):
         # FIXME: currently if it must yield several solves it yields the latest first so not in chronological solve order

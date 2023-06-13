@@ -14,7 +14,7 @@ async def test_add_user(mock_dummy_db_manager):
 
     assert ret_user is not None
     assert type(ret_user) == User
-    assert ret_user.username == "g0uZ" # heavily dependant on test data!
+    assert ret_user.username == "g0uZ"  # heavily dependant on test data!
 
 
 @pytest.mark.asyncio
@@ -34,8 +34,8 @@ async def test_double_add_user(mock_dummy_db_manager, mocker):
     "idx, expected",
     [
         (-1, False),
-        (1 , True ),
-    ]
+        (1, True),
+    ],
 )
 async def test_has_user(idx, expected, mock_dummy_db_manager):
     db = mock_dummy_db_manager

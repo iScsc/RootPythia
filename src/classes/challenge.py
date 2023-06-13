@@ -1,19 +1,27 @@
-class Challenge():
+class Challenge:
     """Class for the Challenge object"""
+
     def __init__(self, challenge_id: int, data: dict):
         """
-            idx: int,
-            author_id: int,
-            title: str,
-            category:str,
-            description: str,
-            pts: int,
-            difficulty: str
+        idx: int,
+        author_id: int,
+        title: str,
+        category:str,
+        description: str,
+        pts: int,
+        difficulty: str
         """
         self.idx = challenge_id
 
         parsed_data = Challenge.parse_rootme_challenge_data(data)
-        (self.author_id, self.title, self.category, self.description, self.pts, self.difficulty) = parsed_data
+        (
+            self.author_id,
+            self.title,
+            self.category,
+            self.description,
+            self.pts,
+            self.difficulty,
+        ) = parsed_data
 
     @staticmethod
     def parse_rootme_challenge_data(data):
@@ -27,7 +35,9 @@ class Challenge():
 
         title = data["titre"]
         # parse the challenge category to ASCII character and better usability
-        category = data["rubrique"].lower().replace(" ", "").replace('\u00E9', 'e').replace('\u00E8', 'e')
+        category = (
+            data["rubrique"].lower().replace(" ", "").replace("\u00E9", "e").replace("\u00E8", "e")
+        )
         description = data["soustitre"]
         pts = int(data["score"])
         difficulty = data["difficulte"]

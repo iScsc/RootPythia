@@ -14,6 +14,7 @@ from data import auteurs_example_data, challenges_example_data
 # these plugins will be automatically imported by pytest
 pytest_plugins = ["pytest_mock", "pytest_asyncio"]
 
+
 def pytest_configure():
     pytest.COG_NAME = COG_NAME
 
@@ -21,17 +22,19 @@ def pytest_configure():
 @pytest.fixture
 def null_logger():
     null_logger_name = "null_logger"
+
     def create_null_logger():
         logger = logging.getLogger(null_logger_name)
         logger.handlers = [logging.NullHandler()]
         logger.setLevel(logging.INFO)
-        logger.propagate = False # To not actually log the mock
+        logger.propagate = False  # To not actually log the mock
         return logger
 
     _logger = logging.getLogger(null_logger_name)
     _logger = _logger if _logger.handlers else create_null_logger()
 
     yield _logger
+
 
 # the mocker fixture comes with pytest_mock plugin, see pytest_plugins above
 @pytest.fixture
@@ -58,8 +61,7 @@ async def config_bot(mock_dummy_db_manager, null_logger):
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
-    _bot = commands.Bot(command_prefix="!",
-                     intents=intents)
+    _bot = commands.Bot(command_prefix="!", intents=intents)
 
     _bot.logger = null_logger
 

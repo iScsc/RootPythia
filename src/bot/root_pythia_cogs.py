@@ -7,6 +7,7 @@ from pngmaker import NewValidatedChallenge
 
 NAME = "RootPythiaCommands"
 
+
 class RootPythiaCommands(commands.Cog, name=NAME):
     """Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at the bot init"""
 
@@ -36,18 +37,18 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             self.logger.exception("'%s' command failed", ctx.command)
 
     @commands.before_invoke(log_command_call)
-    @commands.command(name='hey')
+    @commands.command(name="hey")
     async def hey(self, ctx):
         await ctx.message.channel.send("hey command works!!\nJust happy to be alive")
 
     @commands.before_invoke(log_command_call)
-    @commands.command(name='ping')
+    @commands.command(name="ping")
     async def ping(self, ctx):
         await ctx.message.channel.send("weird habit... but I guess: pong?...")
 
     # TODO: add a add_users command that would accept a list of ids
     @commands.before_invoke(log_command_call)
-    @commands.command(name='adduser')
+    @commands.command(name="adduser")
     async def adduser(self, ctx, idx: int):
         user = await self.dbmanager.add_user(idx)
 
@@ -59,17 +60,21 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
 
     @commands.before_invoke(log_command_call)
-    @commands.command(name='getuser')
+    @commands.command(name="getuser")
     async def getuser(self, ctx, idx: int):
         user = self.dbmanager.get_user(idx)
 
         if user is None:
             self.logger.debug("DB Manager returned 'None' for UserID '%s'", idx)
-            await ctx.message.channel.send(f"User id '{idx}' isn't in the database, you must add it first")
+            await ctx.message.channel.send(
+                f"User id '{idx}' isn't in the database, you must add it first"
+            )
             return
 
         self.logger.debug("Get user '%s' for id=%d", repr(user), idx)
-        await ctx.message.channel.send(f"{user} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>")
+        await ctx.message.channel.send(
+            f"{user} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>"
+        )
 
     # TODO: make the resfresh delay configurable
     @tasks.loop(seconds=10)
@@ -88,7 +93,9 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @check_new_solves.error
     async def loop_error_handler(self, exc):
-        await self.bot.channel.send("check_new_solves loop failed, please check logs for more details")
+        await self.bot.channel.send(
+            "check_new_solves loop failed, please check logs for more details"
+        )
         # logging of the traceback is already handled by the asyncio package
         self.logger.error("check_new_solves loop failed")
 

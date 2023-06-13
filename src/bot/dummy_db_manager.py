@@ -3,6 +3,7 @@ import logging
 from classes import User
 from classes import Challenge
 
+
 class DummyDBManager:
     def __init__(self, api_manager):
         self.users = []
@@ -30,7 +31,7 @@ class DummyDBManager:
     def get_user(self, idx):
         """Retrieve the user object whose id matches 'id', None if not found"""
         return next(filter(lambda user: user.idx == idx, self.users), None)
-    
+
     def get_users(self):
         return self.users
 

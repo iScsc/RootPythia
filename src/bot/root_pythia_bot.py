@@ -12,7 +12,7 @@ from bot.dummy_db_manager import DummyDBManager
 
 """The bot module, which handles discord interface"""
 
-CHANNEL_ID = getenv('CHANNEL_ID')
+CHANNEL_ID = getenv("CHANNEL_ID")
 
 
 def craft_intents():
@@ -47,6 +47,7 @@ BOT.logger = logging.getLogger(__name__)
 
 ########### Setup bot events response ###############
 
+
 @BOT.event
 async def on_ready():
     # is this call secure??
@@ -68,7 +69,10 @@ async def on_ready():
 @BOT.event
 async def on_error(event, *args, **kwargs):
     if event == "on_ready":
-        BOT.logger.error("Event '%s' failed (probably from invalid channel ID), closing connection and exiting...", event)
+        BOT.logger.error(
+            "Event '%s' failed (probably from invalid channel ID), closing connection and exiting...",
+            event,
+        )
         await BOT.close()
         exit(1)
     else:

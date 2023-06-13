@@ -5,9 +5,10 @@ import discord
 
 from bot import BOT as root_pythia
 
-MODE = getenv('MODE')
-DISCORD_TOKEN = getenv('DISCORD_TOKEN')
-LOG_LEVEL = getenv('LOG_LEVEL')
+MODE = getenv("MODE")
+DISCORD_TOKEN = getenv("DISCORD_TOKEN")
+LOG_LEVEL = getenv("LOG_LEVEL")
+
 
 def main():
     # Setup a beautiful root logger
@@ -22,5 +23,6 @@ def main():
         logging.error("Invalid Discord token!")
         exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
