@@ -1,3 +1,5 @@
+# pylint: disable=line-too-long
+
 # !!! CAUTION !!!
 #
 # Some test heavily depends on the hardcoded data in here

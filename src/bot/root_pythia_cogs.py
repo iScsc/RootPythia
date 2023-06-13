@@ -9,7 +9,10 @@ NAME = "RootPythiaCommands"
 
 
 class RootPythiaCommands(commands.Cog, name=NAME):
-    """Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at the bot init"""
+    """
+    Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at
+    the bot init
+    """
 
     def __init__(self, bot, dbmanager):
         self.bot = bot
@@ -21,16 +24,17 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     async def log_command_call(self, ctx):
         # Maybe we should use the on_command event
         # https://discordpy.readthedocs.io/en/stable/ext/commands/api.html?highlight=cog#discord.discord.ext.commands.on_command
-        # the logging would be implicit, no need of a redundant @commands.before_invoke(...) on each command
-        # But right now I prefer to stick with this explicit solution
+        # the logging would be implicit, no need of a redundant @commands.before_invoke(...) on
+        # each command. But right now I prefer to stick with this explicit solution
         self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         await ctx.send("Command failed, please check logs for more details")
 
-        # this dirty try + raise is mandatory because the exception stored in error has been captured
-        # by discord.py so sys.exc_info() is empty, we re aise it on purpose to log properly
+        # this dirty try + raise is mandatory because the exception stored in error has been
+        # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
+        # properly
         try:
             raise error
         except:
@@ -87,7 +91,8 @@ class RootPythiaCommands(commands.Cog, name=NAME):
                 self.logger.info("%s solved '%s'", user, solved_challenge)
 
                 # this context manager handles the file image creation and deletion
-                # TODO: change this hardcoded order=2 and create an is_first_blood or solved_rank method in DB Manager
+                # TODO: change this hardcoded order=2 and create an is_first_blood or solved_rank
+                # method in DB Manager
                 with NewValidatedChallenge(user, solved_challenge, 2) as solve:
                     await self.bot.channel.send(file=discord.File(solve))
 

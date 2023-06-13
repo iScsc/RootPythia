@@ -25,9 +25,13 @@ class Challenge:
 
     @staticmethod
     def parse_rootme_challenge_data(data):
-        """A static method that returns a tuple of few challenge data extracted from raw RootMe API data"""
+        """
+        A static method that returns a tuple of few challenge data extracted from
+        raw RootMe API data
+        """
 
-        # multitline extraction so that in case of error (API change for exemple) the error clearly show the wrong line
+        # multitline extraction so that in case of error (API change for exemple) the error clearly
+        # shows the wrong line
         data = data[0]
         authors = data["auteurs"]
         main_author = authors["0"]
@@ -45,7 +49,11 @@ class Challenge:
         return (author_id, title, category, description, pts, difficulty)
 
     def __repr__(self):
-        return f"Challenge(id={self.idx}, author ID={self.author_id}, title={self.title}, category={self.category}, description={self.description}, points={self.pts}, difficulty={self.difficulty})"
+        return (
+            f"Challenge(id={self.idx}, author ID={self.author_id}, title={self.title}, "
+            f"category={self.category}, description={self.description}, points={self.pts}, "
+            f"difficulty={self.difficulty})"
+        )
 
     def __str__(self):
         return f"{self.title} - {self.category} - {self.pts}"

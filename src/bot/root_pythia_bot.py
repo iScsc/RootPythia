@@ -35,7 +35,10 @@ def craft_intents():
 
 
 ########### Create bot object #################
-_DESCRIPTION = "RootPythia is a Discord bot fetching RootMe API to notify everyone when a user solves a new challenge!"
+_DESCRIPTION = (
+    "RootPythia is a Discord bot fetching RootMe API to notify everyone"
+    "when a user solves a new challenge!"
+)
 _PREFIX = "!"
 _INTENTS = craft_intents()
 
@@ -70,7 +73,7 @@ async def on_ready():
 async def on_error(event, *args, **kwargs):
     if event == "on_ready":
         BOT.logger.error(
-            "Event '%s' failed (probably from invalid channel ID), closing connection and exiting...",
+            "Event '%s' failed (probably from invalid channel ID), close connection and exit...",
             event,
         )
         await BOT.close()

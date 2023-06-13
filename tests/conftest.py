@@ -55,7 +55,8 @@ def mock_dummy_db_manager(mock_rootme_api_manager):
     yield db
 
 
-# this pytest_asyncio decorator allows to automatically await async fixture before passing them to tests
+# this pytest_asyncio decorator allows to automatically await async fixture before passing them
+# to tests
 @pytest_asyncio.fixture
 async def config_bot(mock_dummy_db_manager, null_logger):
     intents = discord.Intents.default()

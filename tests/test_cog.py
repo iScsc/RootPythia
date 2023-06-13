@@ -13,7 +13,8 @@ async def test_adduser_command(config_bot):
     bot = config_bot
 
     # if the API Manager is not rightly mocked this test should fail, on purpose!
-    # because the API Manager is mocked to always return data from tests/data/rootme_example_data no matter the id passed
+    # because the API Manager is mocked to always return data from tests/data/rootme_example_data
+    # no matter the id passed
     await dpytest.message("!adduser 42")
     assert dpytest.verify().message().contains().content("g0uZ")
 
@@ -77,7 +78,8 @@ async def NOP_test_check_solves_loop(config_bot, mock_rootme_api_manager, mocker
 @pytest.mark.asyncio
 async def test_command_exception_handling(config_bot, mocker):
     bot = config_bot
-    # patching this method in particular is arbitrary: the only goal is to raise an exception during a command execution
+    # patching this method in particular is arbitrary: the only goal is to raise an exception
+    # during a command execution
     # I chose the "getuser" command purely arbitrary and this could be changed in the future
     mocker.patch("bot.dummy_db_manager.DummyDBManager.get_user", side_effect=Exception)
 

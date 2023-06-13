@@ -30,7 +30,9 @@ class User:
     # but then what's the point of the API Manager ?
     @staticmethod
     def parse_rootme_user_data(data):
-        """A static method that returns a tuple of few user data extracted from raw RootMe API data"""
+        """
+        A static method that returns a tuple of few user data extracted from raw RootMe API data
+        """
 
         idx = int(data["id_auteur"])
         username = data["nom"]
@@ -53,7 +55,10 @@ class User:
             yield solve_id
 
     def __repr__(self):
-        return f"User(id={self.idx}, username={self.username}, score={self.score}, rank={self.rank}, solves={self.nb_solves})"
+        return (
+            f"User(id={self.idx}, username={self.username}, "
+            f"score={self.score}, rank={self.rank}, solves={self.nb_solves})"
+        )
 
     def __str__(self):
         return f"{self.username} #{self.idx}"
@@ -66,12 +71,14 @@ class User:
         if self.nb_new_solves < 0:
             self.nb_new_solves = 0
             raise InvalidUserData(
-                f"user {self.idx} as a negative number of new solves: before update={self.nb_solves}; after={parsed_nb_solves}"
+                f"user {self.idx} as a negative number of new solves: "
+                f"before update={self.nb_solves}; after={parsed_nb_solves}"
             )
 
     def yield_new_solves(self, raw_user_data):
-        # FIXME: currently if it must yield several solves it yields the latest first so not in chronological solve order
-        # that shouldn't be a problem with regular checking (rarely someone flags twice in less than 1 minute)
+        # FIXME: currently if it must yield several solves it yields the latest first so not in
+        # chronological solve order that shouldn't be a problem with regular checking (rarely
+        # someone flags twice in less than 1 minute)
         # but if the new solves checking is less frequent (few minutes) it can happen
         solves_id_iterator = User.parse_rootme_user_solves_and_yield(raw_user_data)
 
