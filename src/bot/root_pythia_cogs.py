@@ -19,6 +19,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.logger = logging.getLogger(__name__)
         self.dbmanager = dbmanager
 
+        # pylint: disable-next=no-member
         self.check_new_solves.start()
 
     async def log_command_call(self, ctx):
@@ -37,7 +38,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # properly
         try:
             raise error
-        except:
+        except Exception:
             self.logger.exception("'%s' command failed", ctx.command)
 
     @commands.before_invoke(log_command_call)
@@ -104,4 +105,5 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # logging of the traceback is already handled by the asyncio package
         self.logger.error("check_new_solves loop failed")
 
+        # pylint: disable-next=no-member
         self.check_new_solves.restart()
