@@ -1,3 +1,6 @@
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+
 import logging
 
 import pytest
@@ -6,13 +9,18 @@ import discord
 from discord.ext import commands
 import discord.ext.test as dpytest
 
+from data import auteurs_example_data, challenges_example_data
+
 from bot.root_pythia_cogs import RootPythiaCommands
 from bot.root_pythia_cogs import NAME as COG_NAME
 from bot.dummy_db_manager import DummyDBManager
-from data import auteurs_example_data, challenges_example_data
 
 # these plugins will be automatically imported by pytest
 pytest_plugins = ["pytest_mock", "pytest_asyncio"]
+
+
+class BotSetupError(Exception):
+    pass
 
 
 def pytest_configure():
@@ -71,7 +79,10 @@ async def config_bot(mock_dummy_db_manager, null_logger):
 
     dpytest.configure(_bot)
 
-    _bot.channel = next(_bot.get_all_channels())
+    try:
+        _bot.channel = next(_bot.get_all_channels())
+    except StopIteration as exc:
+        raise BotSetupError("_bot.get_all_channels() seems empty") from exc
 
     yield _bot
 
