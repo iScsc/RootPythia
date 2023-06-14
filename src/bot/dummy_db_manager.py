@@ -4,6 +4,20 @@ from classes import User
 from classes import Challenge
 
 
+class InvalidUser(Exception):
+    def __init__(self, idx = None, message = None):
+        self.idx = idx
+
+        if message is None:
+            self.message = "Invalid User"
+            if self.idx is not None:
+                self.message += f": {self.idx}"
+        else:
+            self.message = (message % self.idx) if "%s" in message else message
+
+        super().__init__(self.message)
+
+
 class DummyDBManager:
     def __init__(self, api_manager):
         self.users = []
@@ -38,8 +52,7 @@ class DummyDBManager:
     async def fetch_user_new_solves(self, idx):
         user = self.get_user(idx)
         if user is None:
-            # TODO: add a specialized Exception
-            raise Exception(f"User '{idx}' not in database")
+            raise InvalidUser(idx, "DummyDBManager.fetch_user_new_solves: User %s not in database")
 
         raw_user_data = await self.api_manager.get_user_by_id(idx)
         user.update_new_solves(raw_user_data)
