@@ -1,0 +1,2 @@
+from data.rootme_api_example_data import auteurs_example_data
+from data.rootme_api_example_data import challenges_example_data

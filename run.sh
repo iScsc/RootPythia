@@ -11,7 +11,10 @@ run__prod () {
 run__dev () {
 	# dev mode
 	docker build --file Dockerfile.dev -t ${NAME}-dev:latest .
-	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/${NAME}/src ${NAME}-dev:latest
+	VOLUMES="--volume $(realpath -P ./src):/opt/${NAME}/src --volume $(realpath -P ./tests):/opt/${NAME}/tests"
+	# PYTHONPATH is needed to import sources from tests folder
+	HARDCODED_ENV='--env PYTHONPATH=./src'
+	docker run --interactive --tty --env-file .env.dev ${HARDCODED_ENV} ${VOLUMES} ${NAME}-dev:latest
 }
 
 run__watch () {
