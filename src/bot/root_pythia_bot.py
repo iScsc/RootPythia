@@ -1,4 +1,7 @@
+"""The bot module, which handles discord interface"""
+
 from os import getenv
+import sys
 import logging
 
 import discord
@@ -9,8 +12,6 @@ from api.rate_limiter import RateLimiter
 from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
 
-
-"""The bot module, which handles discord interface"""
 
 CHANNEL_ID = getenv("CHANNEL_ID")
 
@@ -63,7 +64,7 @@ async def on_ready():
 
     # Fetch main channel and send initialization message
     BOT.channel = await BOT.fetch_channel(CHANNEL_ID)
-    await BOT.channel.send(f"Channel initliazed")
+    await BOT.channel.send("Channel initliazed")
 
     # Register cogs
     await BOT.add_cog(RootPythiaCommands(BOT, db_manager))
@@ -77,7 +78,7 @@ async def on_error(event, *args, **kwargs):
             event,
         )
         await BOT.close()
-        exit(1)
+        sys.exit(1)
     else:
         # maybe this call is too intrusive/verbose...
         await BOT.channel.send(f"{event} event failed, please check logs for more details")
