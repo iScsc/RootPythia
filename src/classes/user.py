@@ -15,9 +15,11 @@ class User:
         """
         parsed_data = User.parse_rootme_user_data(data)
 
-        # see keys and parse_rootme_user_data for attribute list and values
-        for key, value in parsed_data.items():
-            setattr(self, key, value)
+        self.idx = parsed_data["idx"]
+        self.username = parsed_data["username"]
+        self.score = parsed_data["score"]
+        self.rank = parsed_data["rank"]
+        self.nb_solves = parsed_data["nb_solves"]
 
         self.nb_new_solves = 0
 
@@ -83,8 +85,12 @@ class User:
         solves_id_iterator = User.parse_rootme_user_solves_and_yield(raw_user_data)
 
         # restrict to the first elements => latest solves => new solves
-        for i in range(self.nb_new_solves):
-            yield next(solves_id_iterator)
+        for _ in range(self.nb_new_solves):
+            try:
+                yield next(solves_id_iterator)
+            except StopIteration as exc:
+                # TODO: this could be cool to log.error here but User class has no logger
+                raise InvalidUserData("raw_user_data has less solves than nb_new_solves") from exc
 
         self.nb_solves += self.nb_new_solves
         self.nb_new_solves = 0
