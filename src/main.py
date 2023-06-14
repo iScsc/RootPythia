@@ -1,6 +1,7 @@
-from os import getenv
-import asyncio
 import logging
+from os import getenv
+import sys
+
 import discord
 
 from bot import BOT as root_pythia
@@ -21,7 +22,7 @@ def main():
         root_pythia.run(DISCORD_TOKEN, log_handler=None)
     except discord.errors.LoginFailure:
         logging.error("Invalid Discord token!")
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
