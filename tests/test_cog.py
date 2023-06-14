@@ -65,8 +65,8 @@ async def NOP_test_check_solves_loop(config_bot, mock_rootme_api_manager, mocker
     await asleep(0.15)
 
     # can't figure out hwo to do that:
-    #assert dpytest.verify().message().file(NewValidatedChallenge.NEW_SOLVE_PATH)
-    #assert dpytest.verify().message().attachment(NewValidatedChallenge.NEW_SOLVE_PATH)
+    # assert dpytest.verify().message().file(NewValidatedChallenge.NEW_SOLVE_PATH)
+    # assert dpytest.verify().message().attachment(NewValidatedChallenge.NEW_SOLVE_PATH)
 
 
 @pytest.mark.asyncio

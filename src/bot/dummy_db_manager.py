@@ -5,7 +5,7 @@ from classes import Challenge
 
 
 class InvalidUser(Exception):
-    def __init__(self, idx = None, message = None):
+    def __init__(self, idx=None, message=None):
         self.idx = idx
 
         if message is None:
