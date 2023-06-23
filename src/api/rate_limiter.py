@@ -98,7 +98,7 @@ class RateLimiter:
                     retry = True
                     retry_count += 1
                     continue
-            
+
             else:
                 raise NotImplementedError("Only GET method implemented for now.")
 
