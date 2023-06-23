@@ -5,8 +5,11 @@ from discord.ext import commands, tasks
 
 from pngmaker import NewValidatedChallenge
 
-NAME = "RootPythiaCommands"
+from os import getenv
 
+REFRESH_DELAY = int(getenv("REFRESH_DELAY") or "10")    # in seconds !
+
+NAME = "RootPythiaCommands"
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """
@@ -82,7 +85,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         )
 
     # TODO: make the resfresh delay configurable
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=REFRESH_DELAY)
     async def check_new_solves(self):
         self.logger.info("Checking for new solves...")
 
