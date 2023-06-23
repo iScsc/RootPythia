@@ -87,18 +87,18 @@ class RateLimiter:
                         request.cookies,
                         resp.status_code,
                     )
-                    if retry_count < self._max_retry:
-                        # Retry the request
-                        retry = True
-                        retry_count += 1
-                        continue
-
-                    else:
+                    if retry_count >= self._max_retry:
                         self.logger.error(
                             "Failed to get request after %s attempt. We could be banned :(",
                             self._max_retry,
                         )
                         raise RuntimeError("Looks like a ban to me :'(")
+
+                    # Retry the request
+                    retry = True
+                    retry_count += 1
+                    continue
+            
             else:
                 raise NotImplementedError("Only GET method implemented for now.")
 
