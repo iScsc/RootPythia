@@ -36,7 +36,7 @@ class RateLimiter:
         else:
             self._max_retry = DEFAULT_MAX_RETRY
 
-        asyncio.create_task(self.handle_requests())
+        self.task = asyncio.create_task(self.handle_requests())
 
         self.logger = logging.getLogger(__name__)
 
