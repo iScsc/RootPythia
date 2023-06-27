@@ -103,28 +103,32 @@ class RateLimiter:
 
                 elif resp.status_code != 200:
                     self.logger.warning(
-                        "Request : GET %s + %s failed with response code %s",
+                        "Request : GET %s + %s failed with response code %s. Try: %s/%s",
                         request.url,
                         request.cookies,
                         resp.status_code,
                     )
-                    if retry_count >= self._max_retry:
-                        self.logger.error(
-                            "Failed to get request after %s attempt. Try: %s/%s",
-                            retry_count,
-                            self._max_retry,
-                        )
-                        raise RuntimeError("Looks like a ban to me :'(")
+                    if retry_count < self._max_retry:
+                        # Retry the request
+                        retry = True
+                        retry_count += 1
+                        continue
 
-                    # Retry the request
-                    retry = True
-                    retry_count += 1
-                    continue
+                    # log error and abort request
+                    self.logger.error(
+                        "Request GET %s + %s canceled after %s attempt.",
+                        retry_count,
+                        self._max_retry,
+                    )
+                    resp = {"error": "1"}
 
             else:
                 raise NotImplementedError("Only GET method implemented for now.")
 
-            # The request did pass all the tests successfully
+            # set error to 0 if success
+            if "error" not in resp:
+                resp["error"] = "0"
+
             # we send back the response and trigger the event of this request
             self.requests[request.key]["result"] = resp.json()
             self.requests[request.key]["event"].set()
@@ -143,6 +147,9 @@ class RateLimiter:
         await self.queue.put(request)
         await event.wait()
 
+        if self.requests[key]["result"]["error"] == "1":
+            raise RuntimeError("Request failed")
+        
         result = self.requests[key]["result"]
 
         del self.requests[key]
