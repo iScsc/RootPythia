@@ -120,7 +120,9 @@ class RateLimiter:
                         wait,
                     )
                     await asyncio.sleep(wait)
-                    self.logger.warning("Waking up: ready to retry after 429") 
+                    self.logger.warning("Waking up: ready to retry after 429")
+                    retry = True
+                    retry_count += 1
                     continue
 
                 elif resp.status_code != 200:
