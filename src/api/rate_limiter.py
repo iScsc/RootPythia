@@ -141,15 +141,10 @@ class RateLimiter:
                         retry_count,
                         self._max_retry,
                     )
-                    resp = {"error": "1"}
 
             else:
                 raise NotImplementedError("Only GET method implemented for now.")
-
-            # set error to 0 if success
-            if "error" not in resp:
-                resp["error"] = "0"
-
+            
             # we send back the response and trigger the event of this request
             self.requests[request.key]["result"] = resp.json()
             self.requests[request.key]["event"].set()
@@ -168,7 +163,7 @@ class RateLimiter:
         await self.queue.put(request)
         await event.wait()
 
-        if self.requests[key]["result"]["error"] == "1":
+        if self.requests[key]["result"]["status"] != "200":
             raise RuntimeError("Request failed")
         
         result = self.requests[key]["result"]
