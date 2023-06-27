@@ -48,6 +48,7 @@ class RateLimiter:
         last_time_request = datetime.now()
         retry = False
         retry_count = 0
+        error = False
 
         while True:
             # take a new request from the queue
@@ -141,6 +142,7 @@ class RateLimiter:
                         retry_count,
                         self._max_retry,
                     )
+                    error = True
 
             else:
                 raise NotImplementedError("Only GET method implemented for now.")
