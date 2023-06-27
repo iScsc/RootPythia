@@ -6,6 +6,7 @@ from os import getenv
 import requests
 
 DEFAULT_MAX_RETRY = 3
+DEFAULT_MAX_TIMEOUT = 10
 
 
 # pylint: disable=too-few-public-methods
@@ -78,8 +79,28 @@ class RateLimiter:
             if request.method == "GET":
                 # keep track of the last time a request was made
                 last_time_request = datetime.now()
+
                 # actually send the GET request
-                resp = requests.get(request.url, cookies=request.cookies)
+                try:
+                    resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
+                except requests.exceptions.Timeout:
+                    self.logger.error("Request GET %s + %s: the request timed out", 
+                        request.url,
+                        request.cookies,
+                        retry_count, 
+                        self._max_retry
+                    )
+                    if retry_count < self._max_retry:
+                        retry = True
+                        retry_count += 1
+                        continue
+                    
+                    self.logger.error("Request timed out too many times. Potential ban")
+                    
+                    # TODO Send message on discord
+                    
+                    self.logger.error("Shutting down the bot")
+                    exit(1)
 
                 if resp.status_code == 429:
                     try:
