@@ -80,6 +80,26 @@ class RateLimiter:
                 last_time_request = datetime.now()
                 # actually send the GET request
                 resp = requests.get(request.url, cookies=request.cookies)
+
+                if resp.status_code == 429:
+                    try:
+                        wait = int(resp.headers["Retry-After"])
+                    except Exception as exc:
+                        self.logger.error(
+                            "Request got 429 and failed to parse headers: %s", resp.headers
+                        )
+                        raise RuntimeError("Wrong headers") from exc
+
+                    self.logger.warning(
+                        "API overload (429) with request : GET %s + %s. Waiting %ssec.",
+                        request.url,
+                        request.cookies,
+                        wait,
+                    )
+                    await asyncio.sleep(wait)
+                    self.logger.warning("Waking up: ready to retry after 429")
+                    continue
+
                 if resp.status_code != 200:
                     self.logger.warning(
                         "Request : GET %s + %s failed with response code %s",
@@ -89,7 +109,8 @@ class RateLimiter:
                     )
                     if retry_count >= self._max_retry:
                         self.logger.error(
-                            "Failed to get request after %s attempt. We could be banned :(",
+                            "Failed to get request after %s attempt. Try: %s/%s",
+                            retry_count,
                             self._max_retry,
                         )
                         raise RuntimeError("Looks like a ban to me :'(")
