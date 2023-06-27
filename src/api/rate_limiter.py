@@ -6,7 +6,7 @@ from os import getenv
 import requests
 
 DEFAULT_MAX_RETRY = 3
-DEFAULT_MAX_TIMEOUT = 10
+DEFAULT_MAX_TIMEOUT = 20
 
 
 # pylint: disable=too-few-public-methods
@@ -100,8 +100,12 @@ class RateLimiter:
                     
                     # TODO Send message on discord
                     
-                    self.logger.error("Shutting down the bot")
-                    exit(1)
+                    self.logger.error("Waiting 10min.")
+                    await asyncio.sleep(600)
+                    self.logger.warning("Waking up: ready to retry after timeout")
+                    retry = True
+                    retry_count += 1
+                    continue
 
                 if resp.status_code == 429:
                     try:
