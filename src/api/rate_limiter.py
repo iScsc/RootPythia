@@ -146,7 +146,7 @@ class RateLimiter:
                 raise NotImplementedError("Only GET method implemented for now.")
             
             # we send back the response and trigger the event of this request
-            self.requests[request.key]["result"] = resp.json()
+            self.requests[request.key]["result"] = resp.json() if not error else {"error": "1"}
             self.requests[request.key]["event"].set()
             # finally we inform the queue of the end of the process
             self.queue.task_done()
@@ -163,7 +163,7 @@ class RateLimiter:
         await self.queue.put(request)
         await event.wait()
 
-        if self.requests[key]["result"]["status"] != "200":
+        if "error" in self.requests[key]["result"]:
             raise RuntimeError("Request failed")
         
         result = self.requests[key]["result"]
