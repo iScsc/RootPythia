@@ -15,34 +15,71 @@ class RateLimiterError(Exception):
 
 
 class RLTooManyRequestError(RateLimiterError):
-    def __init__(self, timeToWait, request):
+    def __init__(self, timeToWait, request, log):
         super().__init__(request)
         self.timeToWait = timeToWait
+        log(
+            "Request %s + %s got 429 with a retry-time of %s",
+            request.url,
+            request.cookies,
+            timeToWait,
+        )
 
 
 class RLWrongHeaderError(RateLimiterError):
-    def __init__(self, request):
+    def __init__(self, request, log):
         super().__init__(request)
+        log(
+            "Request %s + %s got 429 with a wrong retry-time header: %s",
+            request.url,
+            request.cookies,
+            request.headers,
+        )
 
 
 class RLRetryError(RateLimiterError):
-    def __init__(self, request):
+    def __init__(self, request, retry_count, max_retry, log):
         super().__init__(request)
+        log(
+            "Retrying %s item in queue : %s -> %s + %s ",
+            retry_count,
+            request.key,
+            request.url,
+            request.cookies,
+        )
 
 
 class RLTimeoutError(RateLimiterError):
-    def __init__(self, request):
+    def __init__(self, request, log):
         super().__init__(request)
+        log(
+            "Request %s + %s got timeout after %ss",
+            request.url,
+            request.cookies,
+            DEFAULT_MAX_TIMEOUT,
+        )
 
 
 class RLMaxRetryError(RateLimiterError):
-    def __init__(self, request):
+    def __init__(self, request, max_retry, log):
         super().__init__(request)
+        log(
+            "Request %s + %s retried too many times (%s)",
+            request.url,
+            request.cookies,
+            max_retry,
+        )
 
 
 class RLUnknownError(RateLimiterError):
-    def __init__(self, request):
+    def __init__(self, request, log):
         super().__init__(request)
+        log(
+            "Request %s + %s got unknown error with status code %s",
+            request.url,
+            request.cookies,
+            request.status_code,
+        )
 
 
 # pylint: disable=too-few-public-methods
@@ -81,7 +118,7 @@ class RateLimiter:
         try:
             resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
         except requests.exceptions.Timeout as exc:
-            return (None, RLTimeoutError(request), exc)
+            return (None, RLTimeoutError(request, self.logger.error), exc)
 
         if resp.status_code == 200:
             return (resp.json(), None, None)
@@ -90,17 +127,16 @@ class RateLimiter:
             try:
                 timeToWait = int(resp.headers["Retry-After"])
             except (KeyError, ValueError) as exc:
-                return (None, RLWrongHeaderError(request), exc)
+                return (None, RLWrongHeaderError(request, self.logger.error), exc)
 
             return (
                 None,
-                RLTooManyRequestError(timeToWait, request),
+                RLTooManyRequestError(timeToWait, request, self.logger.warning),
                 None,
             )
 
         else:
-            return (None, RLUnknownError(request), None)
-
+            return (None, RLUnknownError(request, self.logger.error), None)
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
@@ -123,13 +159,6 @@ class RateLimiter:
                 retry_count = 0
             else:
                 # request stays the same
-                self.logger.debug(
-                    "Retrying %s item in queue : %s -> %s + %s ",
-                    retry_count,
-                    request.key,
-                    request.url,
-                    request.cookies,
-                )
                 retry = False
 
             # wait 50ms for rate limitation purpose ;)
@@ -144,9 +173,18 @@ class RateLimiter:
                 resp, exc, parent_exc = await self.get(request)
                 if exc is not None:
                     if retry_count < self._max_retry:
+                        # FIXME weird useless exception just to log the retry
+                        _ = RLRetryError(request, retry_count, self._max_retry, self.logger.debug)
                         retry_count += 1
                         retry = True
                         continue
+
+                    # FIXME we drop the exc, kinda weird
+                    # It's logical because the real error that must be
+                    # raised is RLMaxRetryError. But then, no need to
+                    # track ecx and parent_exc
+                    exc = RLMaxRetryError(request, self._max_retry, self.logger.error)
+
                 self.requests[request.key]["result"] = resp
                 self.requests[request.key]["exception"] = (exc, parent_exc)
 
