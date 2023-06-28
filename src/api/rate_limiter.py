@@ -142,6 +142,11 @@ class RateLimiter:
                 last_time_request = datetime.now()
 
                 resp, exc, parent_exc = await self.get(request)
+                if exc is not None:
+                    if retry_count < self._max_retry:
+                        retry_count += 1
+                        retry = True
+                        continue
                 self.requests[request.key]["result"] = resp
                 self.requests[request.key]["exception"] = (exc, parent_exc)
 
