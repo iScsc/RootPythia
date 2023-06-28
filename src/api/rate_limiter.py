@@ -9,6 +9,28 @@ DEFAULT_MAX_RETRY = 3
 DEFAULT_MAX_TIMEOUT = 20
 
 
+class RateLimiterError(Exception):
+    def __init__(self, request):
+        self.request = request
+
+class RLTooManyRequestError(RateLimiterError):
+    def __init__(self, timeToWait, request):
+        super().__init__(request)
+        self.timeToWait = timeToWait
+
+class RLWrongHeaderError(RateLimiterError):
+    def __init__(self, request):
+        super().__init__(request)
+
+class RLTimeoutError(RateLimiterError):
+    def __init__(self, request):
+        super().__init__(request)
+
+class RLMaxRetryError(RateLimiterError):
+    def __init__(self, request):
+        super().__init__(request)
+
+
 # pylint: disable=too-few-public-methods
 class RequestEntry:
     """
@@ -48,7 +70,6 @@ class RateLimiter:
         last_time_request = datetime.now()
         retry = False
         retry_count = 0
-        error = False
 
         while True:
             # take a new request from the queue
@@ -84,7 +105,7 @@ class RateLimiter:
                 # actually send the GET request
                 try:
                     resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
-                except requests.exceptions.Timeout:
+                except requests.exceptions.Timeout as exc:
                     self.logger.error("Request GET %s + %s: the request timed out", 
                         request.url,
                         request.cookies,
@@ -97,37 +118,25 @@ class RateLimiter:
                         continue
                     
                     self.logger.error("Request timed out too many times. Potential ban")
-                    
-                    # TODO Send message on discord
-                    
-                    self.logger.error("Waiting 10min.")
-                    await asyncio.sleep(600)
-                    self.logger.warning("Waking up: ready to retry after timeout")
-                    retry = True
-                    retry_count += 1
-                    continue
+                    self.requests[request.key]["exception"] = (TimeoutError(), exc)
 
                 if resp.status_code == 429:
                     try:
-                        wait = int(resp.headers['Retry-After'])
-                    except:
+                        timeToWait = int(resp.headers['Retry-After'])
+                    except (KeyError, ValueError) as exc:
                         self.logger.error(
                             "Request got 429 and failed to parse headers: %s",
                             resp.headers
                         )
-                        raise RuntimeError("Wrong headers")
+                        self.requests[request.key]["exception"] = (RLWrongHeaderError(request), exc)
                     
                     self.logger.warning(
                         "API overload (429) with request : GET %s + %s. Waiting %ssec.",
                         request.url,
                         request.cookies,
-                        wait,
+                        timeToWait,
                     )
-                    await asyncio.sleep(wait)
-                    self.logger.warning("Waking up: ready to retry after 429")
-                    retry = True
-                    retry_count += 1
-                    continue
+                    self.requests[request.key]["exception"] =  (RLTooManyRequestError(timeToWait, request), None)
 
                 elif resp.status_code != 200:
                     self.logger.warning(
@@ -148,13 +157,13 @@ class RateLimiter:
                         retry_count,
                         self._max_retry,
                     )
-                    error = True
+                    self.requests[request.key]["exception"] = (RLMaxRetryError(request), None)
 
             else:
-                raise NotImplementedError("Only GET method implemented for now.")
+                self.requests[request.key]["exception"] = (NotImplementedError("Only GET method implemented for now."), None)
             
             # we send back the response and trigger the event of this request
-            self.requests[request.key]["result"] = resp.json() if not error else {"error": "1"}
+            self.requests[request.key]["result"] = resp.json()
             self.requests[request.key]["event"].set()
             # finally we inform the queue of the end of the process
             self.queue.task_done()
@@ -167,15 +176,18 @@ class RateLimiter:
         event = asyncio.Event()
         self.requests[key] = {}
         self.requests[key]["event"] = event
+        self.requests[key]["exception"] = None
         request = RequestEntry(url, cookies, key, "GET")
         await self.queue.put(request)
         await event.wait()
-
-        if "error" in self.requests[key]["result"]:
-            raise RuntimeError("Request failed")
+        
+        # if an error occured, raise exception
+        if self.requests[key]["exception"] is not None:
+            exc, prev_exc = self.requests[key]["exception"]
+            if prev_exc is not None:
+                raise exc from prev_exc
+            raise exc
         
         result = self.requests[key]["result"]
-
         del self.requests[key]
-
         return result
