@@ -109,8 +109,7 @@ class RateLimiter:
                     )
                     if retry_count >= self._max_retry:
                         self.logger.error(
-                            "Failed to get request after %s attempt. Try: %s/%s",
-                            retry_count,
+                            "Failed to get request after %s attempt",
                             self._max_retry,
                         )
                         raise RuntimeError("Looks like a ban to me :'(")
