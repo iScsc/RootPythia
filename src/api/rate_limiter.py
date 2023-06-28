@@ -13,18 +13,22 @@ class RateLimiterError(Exception):
     def __init__(self, request):
         self.request = request
 
+
 class RLTooManyRequestError(RateLimiterError):
     def __init__(self, timeToWait, request):
         super().__init__(request)
         self.timeToWait = timeToWait
 
+
 class RLWrongHeaderError(RateLimiterError):
     def __init__(self, request):
         super().__init__(request)
 
+
 class RLTimeoutError(RateLimiterError):
     def __init__(self, request):
         super().__init__(request)
+
 
 class RLMaxRetryError(RateLimiterError):
     def __init__(self, request):
@@ -104,39 +108,44 @@ class RateLimiter:
 
                 # actually send the GET request
                 try:
-                    resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
+                    resp = requests.get(
+                        request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT
+                    )
                 except requests.exceptions.Timeout as exc:
-                    self.logger.error("Request GET %s + %s: the request timed out", 
+                    self.logger.error(
+                        "Request GET %s + %s: the request timed out. Try: %s/%s",
                         request.url,
                         request.cookies,
-                        retry_count, 
-                        self._max_retry
+                        retry_count,
+                        self._max_retry,
                     )
                     if retry_count < self._max_retry:
                         retry = True
                         retry_count += 1
                         continue
-                    
+
                     self.logger.error("Request timed out too many times. Potential ban")
                     self.requests[request.key]["exception"] = (TimeoutError(), exc)
 
                 if resp.status_code == 429:
                     try:
-                        timeToWait = int(resp.headers['Retry-After'])
+                        timeToWait = int(resp.headers["Retry-After"])
                     except (KeyError, ValueError) as exc:
                         self.logger.error(
-                            "Request got 429 and failed to parse headers: %s",
-                            resp.headers
+                            "Request got 429 and failed to parse headers: %s", resp.headers
                         )
                         self.requests[request.key]["exception"] = (RLWrongHeaderError(request), exc)
-                    
+
                     self.logger.warning(
                         "API overload (429) with request : GET %s + %s. Waiting %ssec.",
                         request.url,
                         request.cookies,
                         timeToWait,
                     )
-                    self.requests[request.key]["exception"] =  (RLTooManyRequestError(timeToWait, request), None)
+                    self.requests[request.key]["exception"] = (
+                        RLTooManyRequestError(timeToWait, request),
+                        None,
+                    )
 
                 elif resp.status_code != 200:
                     self.logger.warning(
@@ -144,6 +153,8 @@ class RateLimiter:
                         request.url,
                         request.cookies,
                         resp.status_code,
+                        retry,
+                        self._max_retry
                     )
                     if retry_count < self._max_retry:
                         # Retry the request
@@ -156,12 +167,16 @@ class RateLimiter:
                         "Request GET %s + %s canceled after %s attempt.",
                         retry_count,
                         self._max_retry,
+                        retry
                     )
                     self.requests[request.key]["exception"] = (RLMaxRetryError(request), None)
 
             else:
-                self.requests[request.key]["exception"] = (NotImplementedError("Only GET method implemented for now."), None)
-            
+                self.requests[request.key]["exception"] = (
+                    NotImplementedError("Only GET method implemented for now."),
+                    None,
+                )
+
             # we send back the response and trigger the event of this request
             self.requests[request.key]["result"] = resp.json()
             self.requests[request.key]["event"].set()
@@ -180,14 +195,14 @@ class RateLimiter:
         request = RequestEntry(url, cookies, key, "GET")
         await self.queue.put(request)
         await event.wait()
-        
+
         # if an error occured, raise exception
         if self.requests[key]["exception"] is not None:
             exc, prev_exc = self.requests[key]["exception"]
             if prev_exc is not None:
                 raise exc from prev_exc
             raise exc
-        
+
         result = self.requests[key]["result"]
         del self.requests[key]
         return result
