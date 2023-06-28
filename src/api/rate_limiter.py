@@ -25,12 +25,22 @@ class RLWrongHeaderError(RateLimiterError):
         super().__init__(request)
 
 
+class RLRetryError(RateLimiterError):
+    def __init__(self, request):
+        super().__init__(request)
+
+
 class RLTimeoutError(RateLimiterError):
     def __init__(self, request):
         super().__init__(request)
 
 
 class RLMaxRetryError(RateLimiterError):
+    def __init__(self, request):
+        super().__init__(request)
+
+
+class RLUnknownError(RateLimiterError):
     def __init__(self, request):
         super().__init__(request)
 
@@ -66,6 +76,31 @@ class RateLimiter:
         asyncio.create_task(self.handle_requests())
 
         self.logger = logging.getLogger(__name__)
+
+    async def get(self, request):
+        try:
+            resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
+        except requests.exceptions.Timeout as exc:
+            return (None, RLTimeoutError(request), exc)
+
+        if resp.status_code == 200:
+            return (resp.json(), None, None)
+
+        elif resp.status_code == 429:
+            try:
+                timeToWait = int(resp.headers["Retry-After"])
+            except (KeyError, ValueError) as exc:
+                return (None, RLWrongHeaderError(request), exc)
+
+            return (
+                None,
+                RLTooManyRequestError(timeToWait, request),
+                None,
+            )
+
+        else:
+            return (None, RLUnknownError(request), None)
+
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
@@ -106,70 +141,9 @@ class RateLimiter:
                 # keep track of the last time a request was made
                 last_time_request = datetime.now()
 
-                # actually send the GET request
-                try:
-                    resp = requests.get(
-                        request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT
-                    )
-                except requests.exceptions.Timeout as exc:
-                    self.logger.error(
-                        "Request GET %s + %s: the request timed out. Try: %s/%s",
-                        request.url,
-                        request.cookies,
-                        retry_count,
-                        self._max_retry,
-                    )
-                    if retry_count < self._max_retry:
-                        retry = True
-                        retry_count += 1
-                        continue
-
-                    self.logger.error("Request timed out too many times. Potential ban")
-                    self.requests[request.key]["exception"] = (TimeoutError(), exc)
-
-                if resp.status_code == 429:
-                    try:
-                        timeToWait = int(resp.headers["Retry-After"])
-                    except (KeyError, ValueError) as exc:
-                        self.logger.error(
-                            "Request got 429 and failed to parse headers: %s", resp.headers
-                        )
-                        self.requests[request.key]["exception"] = (RLWrongHeaderError(request), exc)
-
-                    self.logger.warning(
-                        "API overload (429) with request : GET %s + %s. Waiting %ssec.",
-                        request.url,
-                        request.cookies,
-                        timeToWait,
-                    )
-                    self.requests[request.key]["exception"] = (
-                        RLTooManyRequestError(timeToWait, request),
-                        None,
-                    )
-
-                elif resp.status_code != 200:
-                    self.logger.warning(
-                        "Request : GET %s + %s failed with response code %s. Try: %s/%s",
-                        request.url,
-                        request.cookies,
-                        resp.status_code,
-                        retry,
-                        self._max_retry
-                    )
-                    if retry_count < self._max_retry:
-                        # Retry the request
-                        retry = True
-                        retry_count += 1
-                        continue
-
-                    # log error and abort request
-                    self.logger.error(
-                        "Request GET %s + %s canceled after %s attempt.",
-                        retry_count,
-                        self._max_retry,
-                        retry
-                    )
-                    self.requests[request.key]["exception"] = (RLMaxRetryError(request), None)
+                resp, exc, parent_exc = await self.get(request)
+                self.requests[request.key]["result"] = resp
+                self.requests[request.key]["exception"] = (exc, parent_exc)
 
             else:
                 self.requests[request.key]["exception"] = (
@@ -178,7 +152,6 @@ class RateLimiter:
                 )
 
             # we send back the response and trigger the event of this request
-            self.requests[request.key]["result"] = resp.json()
             self.requests[request.key]["event"].set()
             # finally we inform the queue of the end of the process
             self.queue.task_done()
