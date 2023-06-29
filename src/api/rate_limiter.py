@@ -5,7 +5,7 @@ from datetime import datetime
 from os import getenv
 import requests
 
-DEFAULT_MAX_RETRY = 3
+DEFAULT_MAX_ATTEMPT = 3
 DEFAULT_MAX_TIMEOUT = 20
 
 
@@ -50,10 +50,10 @@ class RateLimiter:
         self.requests = {}
         self.queue = asyncio.Queue()
         # set a max_retry cap
-        if getenv("MAX_API_RETRY") is not None:
-            self._max_retry = int(getenv("MAX_API_RETRY"))
+        if getenv("MAX_API_ATTEMPT") is not None:
+            self._max_attempt = int(getenv("MAX_API_ATTEMPT"))
         else:
-            self._max_retry = DEFAULT_MAX_RETRY
+            self._max_attempt = DEFAULT_MAX_ATTEMPT
 
         self.task = asyncio.create_task(self.handle_requests())
 
@@ -122,7 +122,7 @@ class RateLimiter:
                 try:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
                 except RateLimiterError as exc:
-                    if request.attempt < self._max_retry:
+                    if request.attempt < self._max_attempt:
                         request.attempt += 1
                         continue
 
