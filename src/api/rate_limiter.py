@@ -37,6 +37,7 @@ class RequestEntry:
         self.cookies = cookies
         self.key = key
         self.method = method
+        self.attempt = 0
 
 
 class RateLimiter:
@@ -87,12 +88,16 @@ class RateLimiter:
 
         # local variable
         last_time_request = datetime.now()
-        retry = False
-        retry_count = 0
+        request = None
 
         while True:
+            # wait 50ms for rate limitation purpose ;)
+            loop_duration = (datetime.now() - last_time_request).total_seconds()
+            if (0.050 - loop_duration) > 0.01:
+                await asyncio.sleep(0.050 - loop_duration)
+
             # take a new request from the queue
-            if not retry:
+            if request is None:
                 request = await self.queue.get()
                 self.logger.debug(
                     "Treating item in queue : %s -> %s + %s ",
@@ -100,22 +105,15 @@ class RateLimiter:
                     request.url,
                     request.cookies,
                 )
-                retry_count = 0
             else:
                 # request stays the same
                 self.logger.log(
                     "Retrying %s item in queue : %s -> %s + %s",
-                    retry_count,
+                    request.attempt,
                     request.key,
                     request.url,
                     request.cookies,
                 )
-                retry = False
-
-            # wait 50ms for rate limitation purpose ;)
-            loop_duration = (datetime.now() - last_time_request).total_seconds()
-            if (0.050 - loop_duration) > 0.01:
-                await asyncio.sleep(0.050 - loop_duration)
 
             if request.method == "GET":
                 # keep track of the last time a request was made
@@ -124,9 +122,8 @@ class RateLimiter:
                 try:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
                 except RateLimiterError as exc:
-                    if retry_count < self._max_retry:
-                        retry_count += 1
-                        retry = True
+                    if request.attempt < self._max_retry:
+                        request.attempt += 1
                         continue
 
                     # set the exception
@@ -141,11 +138,9 @@ class RateLimiter:
                     None,
                 )
 
-            # The request did pass all the tests successfully
-            # we send back the response and trigger the event of this request
             self.requests[request.key]["event"].set()
-            # finally we inform the queue of the end of the process
             self.queue.task_done()
+            request = None
 
     async def make_request(self, url, cookies, method):
         key = uuid.uuid4().hex
