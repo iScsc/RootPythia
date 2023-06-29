@@ -142,7 +142,7 @@ class RateLimiter:
             self.queue.task_done()
             request = None
 
-    async def make_request(self, url, cookies, method):
+    async def make_request(self, url, cookies, method = "GET"):
         key = uuid.uuid4().hex
 
         self.logger.debug("Request for %s added to queue -> %s", url, key)
@@ -151,7 +151,7 @@ class RateLimiter:
         self.requests[key] = {}
         self.requests[key]["event"] = event
         self.requests[key]["exception"] = None
-        request = RequestEntry(url, cookies, key, "GET")
+        request = RequestEntry(url, cookies, key, method)
         await self.queue.put(request)
         await event.wait()
 
