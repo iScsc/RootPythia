@@ -110,7 +110,7 @@ class RateLimiter:
         else:
             self._max_retry = DEFAULT_MAX_RETRY
 
-        asyncio.create_task(self.handle_requests())
+        self.task = asyncio.create_task(self.handle_requests())
 
         self.logger = logging.getLogger(__name__)
 
@@ -194,6 +194,7 @@ class RateLimiter:
                     None,
                 )
 
+            # The request did pass all the tests successfully
             # we send back the response and trigger the event of this request
             self.requests[request.key]["event"].set()
             # finally we inform the queue of the end of the process

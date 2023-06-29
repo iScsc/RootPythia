@@ -5,7 +5,7 @@ NAME="root-pythia"
 run__prod () {
 	# prod mode
 	docker build --file Dockerfile -t ${NAME}:latest .
-	docker run --rm --interactive --tty --detach --env-file .env.prod ${NAME}:latest
+	docker run --rm --interactive --tty --detach --env-file .env.prod --name ${NAME} ${NAME}:latest
 }
 
 run__dev () {
@@ -14,13 +14,13 @@ run__dev () {
 	VOLUMES="--volume $(realpath -P ./src):/opt/${NAME}/src --volume $(realpath -P ./tests):/opt/${NAME}/tests"
 	# PYTHONPATH is needed to import sources from tests folder
 	HARDCODED_ENV='--env PYTHONPATH=./src'
-	docker run --interactive --tty --env-file .env.dev ${HARDCODED_ENV} ${VOLUMES} ${NAME}-dev:latest
+	docker run --interactive --tty --env-file .env.dev ${HARDCODED_ENV} ${VOLUMES} --name ${NAME} ${NAME}-dev:latest
 }
 
 run__watch () {
 	# watch mode
 	docker build --file Dockerfile.watch -t ${NAME}-watch:latest .
-	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/${NAME}/src ${NAME}-watch:latest
+	docker run --interactive --tty --env-file .env.dev --volume $(realpath -P ./src):/opt/${NAME}/src --name ${NAME} ${NAME}-watch:latest
 }
 
 run() {
