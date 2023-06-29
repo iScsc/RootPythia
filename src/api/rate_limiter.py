@@ -10,64 +10,20 @@ DEFAULT_MAX_TIMEOUT = 20
 
 
 class RateLimiterError(Exception):
-    def __init__(self, request):
+    def __init__(self, request, log=None, message="", args=()):
+        if message:
+            super().__init__(message)
+
         self.request = request
+        if log:
+            message = f"Request %s: %s + %s {message}"
+            log(message, request.method, request.url, request.cookie, *args)
 
 
-class RLTooManyRequestError(RateLimiterError):
-    def __init__(self, timeToWait, request, log):
-        super().__init__(request)
+class RLTooManyRequest(RateLimiterError):
+    def __init__(self, request, timeToWait, log, message, *args):
+        super().__init__(request, log, message, *args)
         self.timeToWait = timeToWait
-        log(
-            "Request %s + %s got 429 with a retry-time of %s",
-            request.url,
-            request.cookies,
-            timeToWait,
-        )
-
-
-class RLWrongHeaderError(RateLimiterError):
-    def __init__(self, request, log):
-        super().__init__(request)
-        log(
-            "Request %s + %s got 429 with a wrong retry-time header: %s",
-            request.url,
-            request.cookies,
-            request.headers,
-        )
-
-
-class RLTimeoutError(RateLimiterError):
-    def __init__(self, request, log):
-        super().__init__(request)
-        log(
-            "Request %s + %s got timeout after %ss",
-            request.url,
-            request.cookies,
-            DEFAULT_MAX_TIMEOUT,
-        )
-
-
-class RLMaxRetryError(RateLimiterError):
-    def __init__(self, request, max_retry, log):
-        super().__init__(request)
-        log(
-            "Request %s + %s retried too many times (%s)",
-            request.url,
-            request.cookies,
-            max_retry,
-        )
-
-
-class RLUnknownError(RateLimiterError):
-    def __init__(self, request, log):
-        super().__init__(request)
-        log(
-            "Request %s + %s got unknown error with status code %s",
-            request.url,
-            request.cookies,
-            request.status_code,
-        )
 
 
 # pylint: disable=too-few-public-methods
@@ -106,7 +62,7 @@ class RateLimiter:
         try:
             resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
         except requests.exceptions.Timeout as exc:
-            raise RLTimeoutError(request, self.logger.error) from exc
+            raise RateLimiterError(request, self.logger.error, "Timeout") from exc
 
         if resp.status_code == 200:
             return resp.json()
@@ -115,12 +71,16 @@ class RateLimiter:
             try:
                 timeToWait = int(resp.headers["Retry-After"])
             except (KeyError, ValueError) as exc:
-                raise RLWrongHeaderError(request, self.logger.error) from exc
+                raise RateLimiterError(
+                    request, self.logger.error, "Too many requests (429) and cannot parse headers"
+                ) from exc
 
-            raise RLTooManyRequestError(timeToWait, request, self.logger.warning)
+            raise RLTooManyRequest(
+                request, timeToWait, self.logger.warning, "Too many requests (429)"
+            )
 
         else:
-            raise RLUnknownError(request, self.logger.error)
+            raise RateLimiterError(request, self.logger.error, "Unknown error")
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
@@ -171,7 +131,7 @@ class RateLimiter:
 
                     # set the exception
                     self.requests[request.key]["exception"] = (
-                        RLMaxRetryError(request, self._max_retry, self.logger.error),
+                        RateLimiterError(request, self.logger.error, "To many retries"),
                         exc,
                     )
 
