@@ -12,12 +12,13 @@ DEFAULT_MAX_TIMEOUT = 20
 class RateLimiterError(Exception):
     def __init__(self, request, log=None, message="", args=()):
         if message:
+            message = message % args
             super().__init__(message)
 
         self.request = request
         if log:
             message = f"Request %s: %s + %s {message}"
-            log(message, request.method, request.url, request.cookie, *args)
+            log(message, request.method, request.url, request.cookie)
 
 
 class RLTooManyRequest(RateLimiterError):
