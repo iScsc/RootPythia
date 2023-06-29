@@ -6,7 +6,8 @@ from os import getenv
 import requests
 
 DEFAULT_MAX_ATTEMPT = 3
-DEFAULT_MAX_TIMEOUT = 20
+DEFAULT_REQUEST_TIMEOUT = 20
+DEFAULT_TIMEOUT_DELAY = 10 * 60
 
 
 class RateLimiterError(Exception):
@@ -47,7 +48,7 @@ class RateLimiter:
         and giving back the result to the calling functions when it is received (async probably)
     """
 
-    def __init__(self):
+    def __init__(self, request_timeout=None, timeout_delay=None):
         self.requests = {}
         self.queue = asyncio.Queue()
         # set a max_retry cap
@@ -56,15 +57,16 @@ class RateLimiter:
         else:
             self._max_attempt = DEFAULT_MAX_ATTEMPT
 
+        self._request_timeout = request_timeout or DEFAULT_REQUEST_TIMEOUT
+        self._timeout_delay = timeout_delay or DEFAULT_TIMEOUT_DELAY
         self.task = asyncio.create_task(self.handle_requests())
-
         self.logger = logging.getLogger(__name__)
 
     def handle_get_request(self, request):
         try:
-            resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
+            resp = requests.get(request.url, cookies=request.cookies, timeout=self._request_timeout)
         except requests.exceptions.Timeout as exc:
-            raise RateLimiterError(request, self.logger.error, "Timeout") from exc
+            raise RLErrorWithPause(request, self._timeout_delay, self.logger.error, "Timeout") from exc
 
         if resp.status_code == 200:
             return resp.json()
@@ -122,7 +124,7 @@ class RateLimiter:
                 last_time_request = datetime.now()
 
                 try:
-                    self.requests[request.key]["result"] = self.handle_get_request(request)
+                    self.requests[request.key]["result"] = await self.handle_get_request(request)
                 except RateLimiterError as exc:
                     if request.attempt < self._max_attempt:
                         request.attempt += 1
