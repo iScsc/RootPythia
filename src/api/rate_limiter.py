@@ -129,7 +129,7 @@ class RateLimiter:
 
                     # set the exception
                     self.requests[request.key]["exception"] = (
-                        RateLimiterError(request, self.logger.error, "To many retries"),
+                        RateLimiterError(request, self.logger.error, "Too many attempts"),
                         exc,
                     )
 
