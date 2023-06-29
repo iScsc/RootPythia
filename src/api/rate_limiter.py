@@ -37,18 +37,6 @@ class RLWrongHeaderError(RateLimiterError):
         )
 
 
-class RLRetryError(RateLimiterError):
-    def __init__(self, request, retry_count, max_retry, log):
-        super().__init__(request)
-        log(
-            "Retrying %s item in queue : %s -> %s + %s ",
-            retry_count,
-            request.key,
-            request.url,
-            request.cookies,
-        )
-
-
 class RLTimeoutError(RateLimiterError):
     def __init__(self, request, log):
         super().__init__(request)
@@ -155,6 +143,13 @@ class RateLimiter:
                 retry_count = 0
             else:
                 # request stays the same
+                self.logger.log(
+                    "Retrying %s item in queue : %s -> %s + %s",
+                    retry_count,
+                    request.key,
+                    request.url,
+                    request.cookies,
+                )
                 retry = False
 
             # wait 50ms for rate limitation purpose ;)
@@ -174,14 +169,11 @@ class RateLimiter:
                         retry = True
                         continue
 
-                    # FIXME we drop the exc, kinda weird
-                    # It's logical because the real error that must be
-                    # raised is RLMaxRetryError. But then, no need to
-                    # track ecx and parent_exc
-                    exc = RLMaxRetryError(request, self._max_retry, self.logger.error)
-
-                self.requests[request.key]["result"] = resp
-                self.requests[request.key]["exception"] = (exc, parent_exc)
+                    # set the exception
+                    self.requests[request.key]["exception"] = (
+                        RLMaxRetryError(request, self._max_retry, self.logger.error),
+                        exc,
+                    )
 
             else:
                 self.requests[request.key]["exception"] = (
