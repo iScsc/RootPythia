@@ -126,6 +126,9 @@ class RateLimiter:
                 try:
                     self.requests[request.key]["result"] = await self.handle_get_request(request)
                 except RateLimiterError as exc:
+                    if isinstance(exc, RLErrorWithPause):
+                        await asyncio.sleep(exc.timeToWait)
+
                     if request.attempt < self._max_attempt:
                         request.attempt += 1
                         self.queue.put(request)
