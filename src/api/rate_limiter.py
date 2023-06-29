@@ -21,9 +21,9 @@ class RateLimiterError(Exception):
             log(message, request.method, request.url, request.cookie)
 
 
-class RLTooManyRequest(RateLimiterError):
-    def __init__(self, request, timeToWait, log, message, *args):
-        super().__init__(request, log, message, *args)
+class RLErrorWithPause(RateLimiterError):
+    def __init__(self, request, timeToWait, *args, **kwargs):
+        super().__init__(request, *args, **kwargs)
         self.timeToWait = timeToWait
 
 
@@ -77,7 +77,7 @@ class RateLimiter:
                     request, self.logger.error, "Too many requests (429) and cannot parse headers"
                 ) from exc
 
-            raise RLTooManyRequest(
+            raise RLErrorWithPause(
                 request, timeToWait, self.logger.warning, "Too many requests (429)"
             )
 
