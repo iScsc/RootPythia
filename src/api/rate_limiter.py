@@ -23,9 +23,9 @@ class RateLimiterError(Exception):
 
 
 class RLErrorWithPause(RateLimiterError):
-    def __init__(self, request, timeToWait, *args, **kwargs):
+    def __init__(self, request, time_to_wait, *args, **kwargs):
         super().__init__(request, *args, **kwargs)
-        self.timeToWait = timeToWait
+        self.time_to_wait = time_to_wait
 
 
 # pylint: disable=too-few-public-methods
@@ -73,14 +73,14 @@ class RateLimiter:
 
         elif resp.status_code == 429:
             try:
-                timeToWait = int(resp.headers["Retry-After"])
+                time_to_wait = int(resp.headers["Retry-After"])
             except (KeyError, ValueError) as exc:
                 raise RateLimiterError(
                     request, self.logger.error, "Too many requests (429) and cannot parse headers"
                 ) from exc
 
             raise RLErrorWithPause(
-                request, timeToWait, self.logger.warning, "Too many requests (429)"
+                request, time_to_wait, self.logger.warning, "Too many requests (429)"
             )
 
         else:
@@ -127,7 +127,7 @@ class RateLimiter:
                     self.requests[request.key]["result"] = await self.handle_get_request(request)
                 except RateLimiterError as exc:
                     if isinstance(exc, RLErrorWithPause):
-                        await asyncio.sleep(exc.timeToWait)
+                        await asyncio.sleep(exc.time_to_wait)
 
                     if request.attempt < self._max_attempt:
                         request.attempt += 1
