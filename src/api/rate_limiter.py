@@ -159,7 +159,7 @@ class RateLimiter:
                         RateLimiterError(
                             request, self.logger.error, "Unhandled error. Entring idle state."
                         ),
-                        exc
+                        exc,
                     )
 
             else:
