@@ -66,7 +66,9 @@ class RateLimiter:
         try:
             resp = requests.get(request.url, cookies=request.cookies, timeout=self._request_timeout)
         except requests.exceptions.Timeout as exc:
-            raise RLErrorWithPause(request, self._timeout_delay, self.logger.error, "Timeout") from exc
+            raise RLErrorWithPause(
+                request, self._timeout_delay, self.logger.error, "Timeout"
+            ) from exc
 
         if resp.status_code == 200:
             return resp.json()
@@ -149,7 +151,7 @@ class RateLimiter:
             self.requests[request.key]["event"].set()
             self.queue.task_done()
 
-    async def make_request(self, url, cookies, method = "GET"):
+    async def make_request(self, url, cookies, method="GET"):
         key = uuid.uuid4().hex
 
         self.logger.debug("Request for %s added to queue -> %s", url, key)
