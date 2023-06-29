@@ -114,29 +114,25 @@ class RateLimiter:
 
         self.logger = logging.getLogger(__name__)
 
-    async def get(self, request):
+    def handle_get_request(self, request):
         try:
             resp = requests.get(request.url, cookies=request.cookies, timeout=DEFAULT_MAX_TIMEOUT)
         except requests.exceptions.Timeout as exc:
-            return (None, RLTimeoutError(request, self.logger.error), exc)
+            raise RLTimeoutError(request, self.logger.error) from exc
 
         if resp.status_code == 200:
-            return (resp.json(), None, None)
+            return resp.json()
 
         elif resp.status_code == 429:
             try:
                 timeToWait = int(resp.headers["Retry-After"])
             except (KeyError, ValueError) as exc:
-                return (None, RLWrongHeaderError(request, self.logger.error), exc)
+                raise RLWrongHeaderError(request, self.logger.error) from exc
 
-            return (
-                None,
-                RLTooManyRequestError(timeToWait, request, self.logger.warning),
-                None,
-            )
+            raise RLTooManyRequestError(timeToWait, request, self.logger.warning)
 
         else:
-            return (None, RLUnknownError(request, self.logger.error), None)
+            raise RLUnknownError(request, self.logger.error)
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
@@ -170,11 +166,10 @@ class RateLimiter:
                 # keep track of the last time a request was made
                 last_time_request = datetime.now()
 
-                resp, exc, parent_exc = await self.get(request)
-                if exc is not None:
+                try:
+                    self.requests[request.key]["result"] = self.handle_get_request(request)
+                except RateLimiterError as exc:
                     if retry_count < self._max_retry:
-                        # FIXME weird useless exception just to log the retry
-                        _ = RLRetryError(request, retry_count, self._max_retry, self.logger.debug)
                         retry_count += 1
                         retry = True
                         continue
