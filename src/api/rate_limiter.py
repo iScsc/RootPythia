@@ -57,10 +57,17 @@ class RateLimiter:
         else:
             self._max_attempt = DEFAULT_MAX_ATTEMPT
 
+        self._idle = False
         self._request_timeout = request_timeout or DEFAULT_REQUEST_TIMEOUT
         self._timeout_delay = timeout_delay or DEFAULT_TIMEOUT_DELAY
         self.task = asyncio.create_task(self.handle_requests())
         self.logger = logging.getLogger(__name__)
+
+    def is_idle(self):
+        return self._idle
+
+    def exit_idle(self):
+        self._idle = False
 
     def handle_get_request(self, request):
         try:
@@ -95,6 +102,10 @@ class RateLimiter:
         last_time_request = datetime.now()
 
         while True:
+            if self._idle:
+                await asyncio.sleep(100)
+                continue
+
             # wait 50ms for rate limitation purpose ;)
             loop_duration = (datetime.now() - last_time_request).total_seconds()
             if (0.050 - loop_duration) > 0.01:
@@ -139,6 +150,14 @@ class RateLimiter:
                     # set the exception
                     self.requests[request.key]["exception"] = (
                         RateLimiterError(request, self.logger.error, "Too many attempts"),
+                        exc,
+                    )
+                except Exception as exc:
+                    self._idle = True
+                    self.requests[request.key]["exception"] = (
+                        RateLimiterError(
+                            request, self.logger.error, "Unhandled error. Entring idle state."
+                        ),
                         exc,
                     )
 
