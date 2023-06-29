@@ -7,9 +7,10 @@ from discord.ext import commands, tasks
 
 from pngmaker import NewValidatedChallenge
 
-REFRESH_DELAY = int(getenv("REFRESH_DELAY") or "10")    # in seconds !
+REFRESH_DELAY = int(getenv("REFRESH_DELAY") or "10")  # in seconds !
 
 NAME = "RootPythiaCommands"
+
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """
@@ -53,6 +54,18 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     @commands.command(name="ping")
     async def ping(self, ctx):
         await ctx.message.channel.send("weird habit... but I guess: pong?...")
+
+    @commands.command(name="resume")
+    async def resume(self, ctx):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        if not rate_limiter.is_idle():
+            await ctx.message.channel.send("The Rate Limiter isn't idle, no need to resume.")
+            return
+
+        rate_limiter.exit_idle()
+        await ctx.message.channel.send(
+            "Resumed successfully from idle state, requests can be sent again."
+        )
 
     # TODO: add a add_users command that would accept a list of ids
     @commands.before_invoke(log_command_call)
