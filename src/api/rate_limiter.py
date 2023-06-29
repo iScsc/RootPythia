@@ -10,9 +10,9 @@ DEFAULT_MAX_TIMEOUT = 20
 
 
 class RateLimiterError(Exception):
-    def __init__(self, request, log=None, message="", args=()):
+    def __init__(self, request, log=None, message="", msg_args=()):
         if message:
-            message = message % args
+            message = message % msg_args
             super().__init__(message)
 
         self.request = request
