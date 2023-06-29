@@ -89,7 +89,6 @@ class RateLimiter:
 
         # local variable
         last_time_request = datetime.now()
-        request = None
 
         while True:
             # wait 50ms for rate limitation purpose ;)
@@ -98,8 +97,9 @@ class RateLimiter:
                 await asyncio.sleep(0.050 - loop_duration)
 
             # take a new request from the queue
-            if request is None:
-                request = await self.queue.get()
+            request = await self.queue.get()
+
+            if request.attempts == 0:
                 self.logger.debug(
                     "Treating item in queue : %s -> %s + %s ",
                     request.key,
@@ -108,9 +108,10 @@ class RateLimiter:
                 )
             else:
                 # request stays the same
-                self.logger.log(
-                    "Retrying %s item in queue : %s -> %s + %s",
+                self.logger.info(
+                    "Retrying %s/%s item in queue : %s -> %s + %s",
                     request.attempt,
+                    self._max_attempt,
                     request.key,
                     request.url,
                     request.cookies,
@@ -125,6 +126,7 @@ class RateLimiter:
                 except RateLimiterError as exc:
                     if request.attempt < self._max_attempt:
                         request.attempt += 1
+                        self.queue.put(request)
                         continue
 
                     # set the exception
@@ -141,7 +143,6 @@ class RateLimiter:
 
             self.requests[request.key]["event"].set()
             self.queue.task_done()
-            request = None
 
     async def make_request(self, url, cookies, method = "GET"):
         key = uuid.uuid4().hex
