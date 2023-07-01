@@ -38,13 +38,14 @@ async def test_request_passes(monkeypatch, mocker):
     monkeypatch.setattr("requests.get", mocked_get)
 
     # Trigger test
-    rate_limiter = RateLimiter()
-
     url = "url"
     cookies = {"cookie": "dummy"}
+    request_timeout = -1
+    rate_limiter = RateLimiter(request_timeout=request_timeout)
+
     result = await rate_limiter.make_request(url, cookies, "GET")
 
-    mocked_get.assert_called_once_with(url, cookies=cookies)
+    mocked_get.assert_called_once_with(url, cookies=cookies, timeout=request_timeout)
     assert result is data
 
     # Clean task properly
