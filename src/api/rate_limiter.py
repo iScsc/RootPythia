@@ -148,13 +148,11 @@ class RateLimiter:
                         continue
 
                     # set the exception
-                    self._idle = True
                     self.requests[request.key]["exception"] = (
                         RateLimiterError(request, self.logger.error, "Too many attempts"),
                         exc,
                     )
                 except Exception as exc:
-                    self._idle = True
                     self.requests[request.key]["exception"] = (
                         RateLimiterError(
                             request, self.logger.error, "Unhandled error. Entring idle state."
@@ -186,6 +184,7 @@ class RateLimiter:
 
         # if an error occured, raise exception
         if self.requests[key]["exception"] is not None:
+            self._idle = True
             exc, prev_exc = self.requests[key]["exception"]
             if prev_exc is not None:
                 raise exc from prev_exc
