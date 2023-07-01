@@ -19,7 +19,7 @@ class RateLimiterError(Exception):
         self.request = request
         if log:
             message = f"Request %s: %s + %s {message}"
-            log(message, request.method, request.url, request.cookie)
+            log(message, request.method, request.url, request.cookies)
 
 
 class RLErrorWithPause(RateLimiterError):
@@ -114,7 +114,7 @@ class RateLimiter:
             # take a new request from the queue
             request = await self.queue.get()
 
-            if request.attempts == 0:
+            if request.attempt == 0:
                 self.logger.debug(
                     "Treating item in queue : %s -> %s + %s ",
                     request.key,
