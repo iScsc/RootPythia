@@ -1,15 +1,22 @@
 import pytest
 
-from api.rate_limiter import DEFAULT_MAX_ATTEMPT, RateLimiter
+from api.rate_limiter import (
+    DEFAULT_MAX_ATTEMPT,
+    DEFAULT_REQUEST_TIMEOUT,
+    DEFAULT_TIMEOUT_DELAY,
+    RateLimiter,
+)
 
 
 @pytest.mark.asyncio
-async def test_default_max_attempt(monkeypatch):
+async def test_default_values(monkeypatch):
     monkeypatch.delenv("MAX_API_ATTEMPT", raising=False)
     rate_limiter = RateLimiter()
 
     # pylint: disable-next=protected-access
     assert rate_limiter._max_attempt == DEFAULT_MAX_ATTEMPT
+    assert rate_limiter._request_timeout == DEFAULT_REQUEST_TIMEOUT
+    assert rate_limiter._timeout_delay == DEFAULT_TIMEOUT_DELAY
 
     rate_limiter.task.cancel()
 
