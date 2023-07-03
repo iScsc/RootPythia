@@ -101,3 +101,33 @@ async def test_request_passes(monkeypatch, mocker):
 
     # Clean task properly
     rate_limiter.task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_too_many_request(monkeypatch, mocker):
+    mocked_get = mocker.MagicMock()
+    resp = mocker.MagicMock()
+
+    resp.status_code = 429
+    retry_after = -1
+    resp.headers = {"Retry-After": retry_after}
+    mocked_get.return_value = resp
+
+    monkeypatch.setattr("requests.get", mocked_get)
+
+    monkeypatch.setenv("MAX_API_ATTEMPT", "1")
+    # Trigger test
+    url = "url"
+    cookies = {"cookie": "dummy"}
+    rate_limiter = RateLimiter()
+
+    with pytest.raises(RateLimiterError) as exc_info:
+        await rate_limiter.make_request(url, cookies, "GET")
+    assert exc_info.type is RateLimiterError
+    assert isinstance(exc_info.value.__cause__, RLErrorWithPause)
+    assert exc_info.value.__cause__.time_to_wait == retry_after
+
+    mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
+
+    # Clean task properly
+    rate_limiter.task.cancel()
