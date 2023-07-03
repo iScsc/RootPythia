@@ -144,7 +144,7 @@ class RateLimiter:
 
                     if request.attempt < self._max_attempt:
                         request.attempt += 1
-                        self.queue.put(request)
+                        await self.queue.put(request)
                         continue
 
                     # set the exception
