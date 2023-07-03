@@ -5,6 +5,9 @@ from api.rate_limiter import (
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_TIMEOUT_DELAY,
     RateLimiter,
+    RequestEntry,
+    RateLimiterError,
+    RLErrorWithPause,
 )
 
 
@@ -30,6 +33,47 @@ async def test_env_max_attempt(monkeypatch):
     assert rate_limiter._max_attempt == 42
 
     rate_limiter.task.cancel()
+
+
+@pytest.mark.parametrize(
+    "testing_kwargs",
+    [
+        ({}),
+        ({"message": "some message"}),
+        ({"message": "some message %s; %s", "msg_args": ("arg1", "arg2")}),
+        pytest.param(
+            {"message": "too few args %s; %s", "msg_args": ("only one arg")},
+            marks=pytest.mark.xfail,
+        ),
+        ({"log": None}),
+        ({"log": None, "message": "some message"}),
+    ],
+)
+def test_RateLimiterError(mocker, testing_kwargs):
+    if "log" in testing_kwargs:
+        def mock_log(message, *args):
+            _ = message % args
+        testing_kwargs["log"] = mocker.MagicMock(side_effect=mock_log)
+
+    requ = RequestEntry("url", "cookies", 1, "GET")
+    _ = RateLimiterError(requ, **testing_kwargs)
+
+    if "log" in testing_kwargs:
+        testing_kwargs["log"].assert_called_once()
+
+
+def test_RLErrorWithPause(monkeypatch, mocker):
+    super_init = mocker.MagicMock()
+    monkeypatch.setattr("api.rate_limiter.RateLimiterError.__init__", super_init)
+
+    requ = RequestEntry("url", "cookies", 1, "GET")
+    time2wait = 10
+    args = "some arg"
+    kwargs = {"key": "some kwarg"}
+    exc = RLErrorWithPause(requ, time2wait, *args, **kwargs)
+
+    assert exc.time_to_wait == time2wait
+    super_init.assert_called_once_with(requ, *args, **kwargs)
 
 
 @pytest.mark.asyncio
