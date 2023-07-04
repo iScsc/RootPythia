@@ -130,6 +130,7 @@ async def test_too_many_request(monkeypatch, mocker):
     assert exc_info.type is RateLimiterError
     assert isinstance(exc_info.value.__cause__, RLErrorWithPause)
     assert exc_info.value.__cause__.time_to_wait == retry_after
+    assert rate_limiter.is_idle()
 
     mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
 
@@ -156,6 +157,7 @@ async def test_request_times_out(monkeypatch, mocker):
     assert exc_info.type is RateLimiterError
     assert isinstance(exc_info.value.__cause__, RLErrorWithPause)
     assert exc_info.value.__cause__.time_to_wait == timeout_delay
+    assert rate_limiter.is_idle()
 
     mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
 
