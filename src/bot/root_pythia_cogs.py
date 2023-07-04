@@ -34,14 +34,16 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
     @commands.before_invoke(log_command_call)
-    @commands.command(name="hey")
-    async def hey(self, ctx):
-        await ctx.message.channel.send("hey command works!!\nJust happy to be alive")
-
-    @commands.before_invoke(log_command_call)
-    @commands.command(name="ping")
-    async def ping(self, ctx):
-        await ctx.message.channel.send("weird habit... but I guess: pong?...")
+    @commands.command(name="status")
+    async def status(self, ctx):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        check = ":white_check_mark:"
+        cross = ":x:"
+        paused = check if rate_limiter.is_paused() else cross
+        idle = check if rate_limiter.is_idle() else cross
+        await ctx.send(f"RootMe API's Rate Limiter status:\n"
+                       f"- paused: {paused}\n"
+                       f"- idle: {idle}\n")
 
     @commands.command(name="resume")
     async def resume(self, ctx):
