@@ -91,8 +91,8 @@ class RateLimiter:
                 raise RLErrorWithPause(
                     request, time_to_wait, self.logger.warning, "Too many requests (429)"
                 )
-            case _:
-                raise RateLimiterError(request, self.logger.error, "Unknown error")
+            case code:
+                raise RateLimiterError(request, self.logger.error, f"Unhandled response status: {code}")
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
