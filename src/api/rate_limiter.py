@@ -82,6 +82,8 @@ class RateLimiter:
 
     def handle_get_request(self, request):
         try:
+            # TODO: we should really use a session object to persist cookies and TCP connection
+            # https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
             resp = requests.get(request.url, cookies=request.cookies, timeout=self._request_timeout)
         except requests.exceptions.Timeout as exc:
             raise RLErrorWithPause(
