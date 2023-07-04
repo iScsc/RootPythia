@@ -74,6 +74,7 @@ class RateLimiter:
         return self._idle
 
     def exit_idle(self):
+        self.logger.info("Resuming from idle state")
         self._idle = False
 
     def is_paused(self):
