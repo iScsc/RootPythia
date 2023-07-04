@@ -96,14 +96,18 @@ class RateLimiter:
                     time_to_wait = int(resp.headers["Retry-After"])
                 except (KeyError, ValueError) as exc:
                     raise RateLimiterError(
-                        request, self.logger.error, "Too many requests (429) and cannot parse headers"
+                        request,
+                        self.logger.error,
+                        "Too many requests (429) and cannot parse headers",
                     ) from exc
 
                 raise RLErrorWithPause(
                     request, time_to_wait, self.logger.warning, "Too many requests (429)"
                 )
             case code:
-                raise RateLimiterError(request, self.logger.error, f"Unhandled response status: {code}")
+                raise RateLimiterError(
+                    request, self.logger.error, f"Unhandled response status: {code}"
+                )
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
