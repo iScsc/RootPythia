@@ -106,7 +106,8 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         rate_limiter = self.dbmanager.api_manager.rate_limiter
         if rate_limiter.is_idle():
             await channel.send(
-                f"RateLimiter has entered idle state you should check logs first but you can resume it with `{self.bot.command_prefix}resume`"
+                f"RateLimiter has entered idle state you should check logs first "
+                f"but you can resume it with `{self.bot.command_prefix}resume`"
             )
 
     @commands.Cog.listener()

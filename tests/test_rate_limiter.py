@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 import requests
 
 import pytest
@@ -199,7 +200,7 @@ async def test_fail_post_request():
     rate_limiter = RateLimiter()
 
     # Trigger test
-    with pytest.raises(NotImplementedError) as exc_info:
+    with pytest.raises(NotImplementedError):
         await rate_limiter.make_request(url, cookies, "POST")
 
     # Clean task properly
