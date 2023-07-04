@@ -55,8 +55,10 @@ async def test_env_max_attempt(monkeypatch):
 )
 def test_RateLimiterError(mocker, testing_kwargs):
     if "log" in testing_kwargs:
+
         def mock_log(message, *args):
             _ = message % args
+
         testing_kwargs["log"] = mocker.MagicMock(side_effect=mock_log)
 
     requ = RequestEntry("url", "cookies", 1, "GET")
