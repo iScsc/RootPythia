@@ -49,6 +49,7 @@ def null_logger():
 def mock_rootme_api_manager(mocker):
     rootme_api_manager = mocker.AsyncMock()
 
+    rootme_api_manager.rate_limiter = mocker.Mock()
     rootme_api_manager.get_user_by_id.return_value = auteurs_example_data
     rootme_api_manager.get_challenge_by_id.return_value = challenges_example_data
 
