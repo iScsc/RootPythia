@@ -1,3 +1,5 @@
+import requests
+
 import pytest
 
 from api.rate_limiter import (
@@ -126,6 +128,32 @@ async def test_too_many_request(monkeypatch, mocker):
     assert exc_info.type is RateLimiterError
     assert isinstance(exc_info.value.__cause__, RLErrorWithPause)
     assert exc_info.value.__cause__.time_to_wait == retry_after
+
+    mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
+
+    # Clean task properly
+    rate_limiter.task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_request_times_out(monkeypatch, mocker):
+    mocked_get = mocker.Mock(side_effect=requests.exceptions.Timeout)
+    monkeypatch.setattr("requests.get", mocked_get)
+
+    monkeypatch.setenv("MAX_API_ATTEMPT", "1")
+
+    # Trigger test
+    url = "url"
+    cookies = {"cookie": "dummy"}
+    timeout_delay = -1
+    rate_limiter = RateLimiter(timeout_delay=-1)
+
+    # Assertions
+    with pytest.raises(RateLimiterError) as exc_info:
+        await rate_limiter.make_request(url, cookies, "GET")
+    assert exc_info.type is RateLimiterError
+    assert isinstance(exc_info.value.__cause__, RLErrorWithPause)
+    assert exc_info.value.__cause__.time_to_wait == timeout_delay
 
     mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
 
