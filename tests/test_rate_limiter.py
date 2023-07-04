@@ -166,6 +166,32 @@ async def test_request_times_out(monkeypatch, mocker):
 
 
 @pytest.mark.asyncio
+async def test_request_unknown_error(monkeypatch, mocker):
+    mocked_get = mocker.Mock(side_effect=Exception)
+    monkeypatch.setattr("requests.get", mocked_get)
+
+    monkeypatch.setenv("MAX_API_ATTEMPT", "1")
+
+    # Trigger test
+    url = "url"
+    cookies = {"cookie": "dummy"}
+    timeout_delay = -1
+    rate_limiter = RateLimiter(timeout_delay=-1)
+
+    # Assertions
+    with pytest.raises(RateLimiterError) as exc_info:
+        await rate_limiter.make_request(url, cookies, "GET")
+    assert exc_info.type is RateLimiterError
+    assert isinstance(exc_info.value.__cause__, Exception)
+    assert rate_limiter.is_idle()
+
+    mocked_get.assert_called_once_with(url, cookies=cookies, timeout=DEFAULT_REQUEST_TIMEOUT)
+
+    # Clean task properly
+    rate_limiter.task.cancel()
+
+
+@pytest.mark.asyncio
 async def test_fail_post_request():
     url = "url"
     cookies = {"cookie": "dummy"}
