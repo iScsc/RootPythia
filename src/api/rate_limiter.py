@@ -57,6 +57,7 @@ class RateLimiter:
         else:
             self._max_attempt = DEFAULT_MAX_ATTEMPT
 
+        self._pause = False
         self._idle = False
         self._request_timeout = request_timeout or DEFAULT_REQUEST_TIMEOUT
         self._timeout_delay = timeout_delay or DEFAULT_TIMEOUT_DELAY
@@ -68,6 +69,14 @@ class RateLimiter:
 
     def exit_idle(self):
         self._idle = False
+
+    def is_paused(self):
+        return self._pause
+
+    async def pause(self, delay):
+        self._pause = True
+        await asyncio.sleep(delay)
+        self._pause = False
 
     def handle_get_request(self, request):
         try:
@@ -140,7 +149,7 @@ class RateLimiter:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
                 except RateLimiterError as exc:
                     if isinstance(exc, RLErrorWithPause):
-                        await asyncio.sleep(exc.time_to_wait)
+                        await self.pause(exc.time_to_wait)
 
                     if request.attempt < self._max_attempt:
                         await self.queue.put(request)
