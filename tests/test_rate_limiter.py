@@ -68,9 +68,9 @@ def test_RateLimiterError(mocker, testing_kwargs):
         testing_kwargs["log"].assert_called_once()
 
 
-def test_RLErrorWithPause(monkeypatch, mocker):
+def test_RLErrorWithPause(mocker):
     super_init = mocker.MagicMock()
-    monkeypatch.setattr("api.rate_limiter.RateLimiterError.__init__", super_init)
+    mocker.patch("api.rate_limiter.RateLimiterError.__init__", new=super_init)
 
     requ = RequestEntry("url", "cookies", 1, "GET")
     time2wait = 10
@@ -83,7 +83,7 @@ def test_RLErrorWithPause(monkeypatch, mocker):
 
 
 @pytest.mark.asyncio
-async def test_request_passes(monkeypatch, mocker):
+async def test_request_passes(mocker):
     mocked_get = mocker.MagicMock()
     resp = mocker.MagicMock()
 
@@ -92,7 +92,7 @@ async def test_request_passes(monkeypatch, mocker):
     resp.json.return_value = data
     mocked_get.return_value = resp
 
-    monkeypatch.setattr("requests.get", mocked_get)
+    mocker.patch("requests.get", new=mocked_get)
 
     # Trigger test
     url = "url"
@@ -119,7 +119,7 @@ async def test_too_many_request(monkeypatch, mocker):
     resp.headers = {"Retry-After": retry_after}
     mocked_get.return_value = resp
 
-    monkeypatch.setattr("requests.get", mocked_get)
+    mocker.patch("requests.get", new=mocked_get)
 
     monkeypatch.setenv("MAX_API_ATTEMPT", "1")
     # Trigger test
@@ -143,7 +143,7 @@ async def test_too_many_request(monkeypatch, mocker):
 @pytest.mark.asyncio
 async def test_request_times_out(monkeypatch, mocker):
     mocked_get = mocker.Mock(side_effect=requests.exceptions.Timeout)
-    monkeypatch.setattr("requests.get", mocked_get)
+    mocker.patch("requests.get", mocked_get)
 
     monkeypatch.setenv("MAX_API_ATTEMPT", "1")
 
@@ -170,14 +170,13 @@ async def test_request_times_out(monkeypatch, mocker):
 @pytest.mark.asyncio
 async def test_request_unknown_error(monkeypatch, mocker):
     mocked_get = mocker.Mock(side_effect=Exception)
-    monkeypatch.setattr("requests.get", mocked_get)
+    mocker.patch("requests.get", mocked_get)
 
     monkeypatch.setenv("MAX_API_ATTEMPT", "1")
 
     # Trigger test
     url = "url"
     cookies = {"cookie": "dummy"}
-    timeout_delay = -1
     rate_limiter = RateLimiter(timeout_delay=-1)
 
     # Assertions
