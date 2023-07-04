@@ -154,7 +154,7 @@ class RateLimiter:
                 except Exception as exc:
                     self.requests[request.key]["exception"] = (
                         RateLimiterError(
-                            request, self.logger.error, "Unhandled error. Entring idle state."
+                            request, self.logger.error, "Unhandled error. Entering idle state."
                         ),
                         exc,
                     )
