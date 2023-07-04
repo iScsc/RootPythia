@@ -163,3 +163,17 @@ async def test_request_times_out(monkeypatch, mocker):
 
     # Clean task properly
     rate_limiter.task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_fail_post_request():
+    url = "url"
+    cookies = {"cookie": "dummy"}
+    rate_limiter = RateLimiter()
+
+    # Trigger test
+    with pytest.raises(NotImplementedError) as exc_info:
+        await rate_limiter.make_request(url, cookies, "POST")
+
+    # Clean task properly
+    rate_limiter.task.cancel()
