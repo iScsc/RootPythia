@@ -33,18 +33,6 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # each command. But right now I prefer to stick with this explicit solution
         self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        await ctx.send("Command failed, please check logs for more details")
-
-        # this dirty try + raise is mandatory because the exception stored in error has been
-        # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
-        # properly
-        try:
-            raise error
-        except Exception:
-            self.logger.exception("'%s' command failed", ctx.command)
-
     @commands.before_invoke(log_command_call)
     @commands.command(name="hey")
     async def hey(self, ctx):
@@ -111,6 +99,18 @@ class RootPythiaCommands(commands.Cog, name=NAME):
                 # method in DB Manager
                 with NewValidatedChallenge(user, solved_challenge, 2) as solve:
                     await self.bot.channel.send(file=discord.File(solve))
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        await ctx.send("Command failed, please check logs for more details")
+
+        # this dirty try + raise is mandatory because the exception stored in error has been
+        # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
+        # properly
+        try:
+            raise error
+        except Exception:
+            self.logger.exception("'%s' command failed", ctx.command)
 
     @check_new_solves.error
     async def loop_error_handler(self, exc):
