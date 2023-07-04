@@ -201,6 +201,7 @@ class RateLimiter:
         # if an error occured, raise exception
         if self.requests[key]["exception"] is not None:
             self._idle = True
+            self.logger.error("Entering idle state due to previous errors")
             exc, prev_exc = self.requests[key]["exception"]
             if prev_exc is not None:
                 raise exc from prev_exc
