@@ -77,23 +77,22 @@ class RateLimiter:
                 request, self._timeout_delay, self.logger.error, "Timeout"
             ) from exc
 
-        if resp.status_code == 200:
-            return resp.json()
+        match resp.status_code:
+            case 200:
+                return resp.json()
+            case 429:
+                try:
+                    time_to_wait = int(resp.headers["Retry-After"])
+                except (KeyError, ValueError) as exc:
+                    raise RateLimiterError(
+                        request, self.logger.error, "Too many requests (429) and cannot parse headers"
+                    ) from exc
 
-        elif resp.status_code == 429:
-            try:
-                time_to_wait = int(resp.headers["Retry-After"])
-            except (KeyError, ValueError) as exc:
-                raise RateLimiterError(
-                    request, self.logger.error, "Too many requests (429) and cannot parse headers"
-                ) from exc
-
-            raise RLErrorWithPause(
-                request, time_to_wait, self.logger.warning, "Too many requests (429)"
-            )
-
-        else:
-            raise RateLimiterError(request, self.logger.error, "Unknown error")
+                raise RLErrorWithPause(
+                    request, time_to_wait, self.logger.warning, "Too many requests (429)"
+                )
+            case _:
+                raise RateLimiterError(request, self.logger.error, "Unknown error")
 
     async def handle_requests(self):
         self.logger.info("Starting rate_limiter task...")
