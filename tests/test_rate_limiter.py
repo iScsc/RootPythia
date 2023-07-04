@@ -6,6 +6,7 @@ from api.rate_limiter import (
     DEFAULT_MAX_ATTEMPT,
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_TIMEOUT_DELAY,
+    DEFAULT_IDLE_STATE_SLEEP,
     RateLimiter,
     RequestEntry,
     RateLimiterError,
@@ -22,6 +23,7 @@ async def test_default_values(monkeypatch):
     assert rate_limiter._max_attempt == DEFAULT_MAX_ATTEMPT
     assert rate_limiter._request_timeout == DEFAULT_REQUEST_TIMEOUT
     assert rate_limiter._timeout_delay == DEFAULT_TIMEOUT_DELAY
+    assert rate_limiter._idle_state_sleep == DEFAULT_IDLE_STATE_SLEEP
 
     rate_limiter.task.cancel()
 

@@ -8,6 +8,7 @@ import requests
 DEFAULT_MAX_ATTEMPT = 3
 DEFAULT_REQUEST_TIMEOUT = 20
 DEFAULT_TIMEOUT_DELAY = 10 * 60
+DEFAULT_IDLE_STATE_SLEEP = 10
 
 
 class RateLimiterError(Exception):
@@ -48,7 +49,7 @@ class RateLimiter:
         and giving back the result to the calling functions when it is received (async probably)
     """
 
-    def __init__(self, request_timeout=None, timeout_delay=None):
+    def __init__(self, request_timeout=None, timeout_delay=None, idle_state_sleep=None):
         self.requests = {}
         self.queue = asyncio.Queue()
         # set a max_retry cap
@@ -61,6 +62,7 @@ class RateLimiter:
         self._idle = False
         self._request_timeout = request_timeout or DEFAULT_REQUEST_TIMEOUT
         self._timeout_delay = timeout_delay or DEFAULT_TIMEOUT_DELAY
+        self._idle_state_sleep = idle_state_sleep or DEFAULT_IDLE_STATE_SLEEP
         self.task = asyncio.create_task(self.handle_requests())
         self.logger = logging.getLogger(__name__)
 
@@ -111,7 +113,7 @@ class RateLimiter:
 
         while True:
             if self._idle:
-                await asyncio.sleep(100)
+                await asyncio.sleep(self._idle_state_sleep)
                 continue
 
             # wait 50ms for rate limitation purpose ;)
