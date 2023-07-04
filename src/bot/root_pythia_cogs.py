@@ -100,9 +100,17 @@ class RootPythiaCommands(commands.Cog, name=NAME):
                 with NewValidatedChallenge(user, solved_challenge, 2) as solve:
                     await self.bot.channel.send(file=discord.File(solve))
 
+    async def verbose_if_idle(self, channel):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        if rate_limiter.is_idle():
+            await channel.send(
+                f"RateLimiter has entered idle state you should check logs first but you can resume it with `{self.bot.command_prefix}resume`"
+            )
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         await ctx.send("Command failed, please check logs for more details")
+        await self.verbose_if_idle(ctx)
 
         # this dirty try + raise is mandatory because the exception stored in error has been
         # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
@@ -117,6 +125,8 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         await self.bot.channel.send(
             "check_new_solves loop failed, please check logs for more details"
         )
+        await self.verbose_if_idle(self.bot.channel)
+
         # logging of the traceback is already handled by the asyncio package
         self.logger.error("check_new_solves loop failed")
 
