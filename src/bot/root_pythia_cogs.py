@@ -39,11 +39,16 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         rate_limiter = self.dbmanager.api_manager.rate_limiter
         check = ":white_check_mark:"
         cross = ":x:"
-        paused = check if rate_limiter.is_paused() else cross
-        idle = check if rate_limiter.is_idle() else cross
+        rl_alive = cross if rate_limiter.task.done() else check
+        rl_paused = check if rate_limiter.is_paused() else cross
+        rl_idle = check if rate_limiter.is_idle() else cross
+        bot_loop_alive = check if self.check_new_solves.is_running() else cross
         await ctx.send(f"RootMe API's Rate Limiter status:\n"
-                       f"- paused: {paused}\n"
-                       f"- idle: {idle}\n")
+                       f"- alive: {rl_alive}\n"
+                       f" - paused: {rl_paused}\n"
+                       f" - idle: {rl_idle}\n"
+                       f"Bot's `check_new_solves` loop:\n"
+                       f"- alive: {bot_loop_alive}\n")
 
     @commands.command(name="resume")
     async def resume(self, ctx):
