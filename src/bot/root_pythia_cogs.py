@@ -42,6 +42,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         rl_alive = cross if rate_limiter.task.done() else check
         rl_paused = check if rate_limiter.is_paused() else cross
         rl_idle = check if rate_limiter.is_idle() else cross
+        # pylint: disable-next=no-member
         bot_loop_alive = check if self.check_new_solves.is_running() else cross
         await ctx.send(f"RootMe API's Rate Limiter status:\n"
                        f"- alive: {rl_alive}\n"
