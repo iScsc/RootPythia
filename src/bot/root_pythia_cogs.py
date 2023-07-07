@@ -63,7 +63,27 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             "Resumed successfully from idle state, requests can be sent again."
         )
 
-    # TODO: add a add_users command that would accept a list of ids
+    @commands.before_invoke(log_command_call)
+    @commands.command(name="addusers")
+    async def addusers(self, ctx, *args):
+        self.logger.info(f"I received: {len(args)} arguments:")
+        for i in range(len(args)):
+            try:
+                user_id = int(args[i])
+            except ValueError as e:
+                self.logger.error(f"command `addusers` received: {e}")
+                await ctx.message.channel.send(f"invalid argument received: an user_id is expected, ignoring it for now...")
+                continue
+            
+            user = await self.dbmanager.add_user(user_id)
+            if user is None:
+                await ctx.message.channel.send(f"UserID {user_id} already exists in database")
+                self.logger.warning(f"UserID {user_id} already exists in database")
+                continue
+
+            await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
+            self.logger.info("Add user '%s'", user)
+    
     @commands.before_invoke(log_command_call)
     @commands.command(name="adduser")
     async def adduser(self, ctx, idx: int):
