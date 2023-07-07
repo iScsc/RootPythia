@@ -7,9 +7,10 @@ from discord.ext import commands, tasks
 
 from pngmaker import NewValidatedChallenge
 
-REFRESH_DELAY = int(getenv("REFRESH_DELAY") or "10")    # in seconds !
+REFRESH_DELAY = int(getenv("REFRESH_DELAY") or "10")  # in seconds !
 
 NAME = "RootPythiaCommands"
+
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """
@@ -32,27 +33,35 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # each command. But right now I prefer to stick with this explicit solution
         self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        await ctx.send("Command failed, please check logs for more details")
-
-        # this dirty try + raise is mandatory because the exception stored in error has been
-        # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
-        # properly
-        try:
-            raise error
-        except Exception:
-            self.logger.exception("'%s' command failed", ctx.command)
-
     @commands.before_invoke(log_command_call)
-    @commands.command(name="hey")
-    async def hey(self, ctx):
-        await ctx.message.channel.send("hey command works!!\nJust happy to be alive")
+    @commands.command(name="status")
+    async def status(self, ctx):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        check = ":white_check_mark:"
+        cross = ":x:"
+        rl_alive = cross if rate_limiter.task.done() else check
+        rl_paused = check if rate_limiter.is_paused() else cross
+        rl_idle = check if rate_limiter.is_idle() else cross
+        # pylint: disable-next=no-member
+        bot_loop_alive = check if self.check_new_solves.is_running() else cross
+        await ctx.send(f"RootMe API's Rate Limiter status:\n"
+                       f"- alive: {rl_alive}\n"
+                       f" - paused: {rl_paused}\n"
+                       f" - idle: {rl_idle}\n"
+                       f"Bot's `check_new_solves` loop:\n"
+                       f"- alive: {bot_loop_alive}\n")
 
-    @commands.before_invoke(log_command_call)
-    @commands.command(name="ping")
-    async def ping(self, ctx):
-        await ctx.message.channel.send("weird habit... but I guess: pong?...")
+    @commands.command(name="resume")
+    async def resume(self, ctx):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        if not rate_limiter.is_idle():
+            await ctx.message.channel.send("The Rate Limiter isn't idle, no need to resume.")
+            return
+
+        rate_limiter.exit_idle()
+        await ctx.message.channel.send(
+            "Resumed successfully from idle state, requests can be sent again."
+        )
 
     # TODO: add a add_users command that would accept a list of ids
     @commands.before_invoke(log_command_call)
@@ -99,11 +108,34 @@ class RootPythiaCommands(commands.Cog, name=NAME):
                 with NewValidatedChallenge(user, solved_challenge, 2) as solve:
                     await self.bot.channel.send(file=discord.File(solve))
 
+    async def verbose_if_idle(self, channel):
+        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        if rate_limiter.is_idle():
+            await channel.send(
+                f"RateLimiter has entered idle state you should check logs first "
+                f"but you can resume it with `{self.bot.command_prefix}resume`"
+            )
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        await ctx.send("Command failed, please check logs for more details")
+        await self.verbose_if_idle(ctx)
+
+        # this dirty try + raise is mandatory because the exception stored in error has been
+        # captured by discord.py so sys.exc_info() is empty, we re aise it on purpose to log
+        # properly
+        try:
+            raise error
+        except Exception:
+            self.logger.exception("'%s' command failed", ctx.command)
+
     @check_new_solves.error
     async def loop_error_handler(self, exc):
         await self.bot.channel.send(
             "check_new_solves loop failed, please check logs for more details"
         )
+        await self.verbose_if_idle(self.bot.channel)
+
         # logging of the traceback is already handled by the asyncio package
         self.logger.error("check_new_solves loop failed")
 
