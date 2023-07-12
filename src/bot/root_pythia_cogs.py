@@ -67,13 +67,13 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     @commands.command(name="addusers")
     async def addusers(self, ctx, *args):
         self.logger.info(f"command `addusers` received: {len(args)} arguments:")
-        for i in range(len(args)):
+        for user_id in args:
             try:
-                user_id = int(args[i])
+                user_id = int(user_id)
                 user = await self.dbmanager.add_user(user_id)
             except ValueError as value_err: # Error coming from the int() cast
                 self.logger.error(f"command `addusers` received: {value_err}")
-                await ctx.message.channel.send(f"invalid argument received: an user_id is expected, ignoring it for now...")
+                await ctx.message.channel.send(f"invalid argument received: `{user_id}`; a UserId is expected, ignoring it...")
                 continue
             # TODO: except 404 error -> if the request in add_user fails, we should continue here (ex: multiple users but only one can be wrong)
             # except 404Error as 404_err: # Error coming from add_user() method
