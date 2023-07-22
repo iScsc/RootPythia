@@ -63,41 +63,41 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             "Resumed successfully from idle state, requests can be sent again."
         )
 
-    @commands.before_invoke(log_command_call)
-    @commands.command(name="addusers")
-    async def addusers(self, ctx, *args):
-        self.logger.info(f"command `addusers` received: {len(args)} arguments:")
-        for user_id in args:
-            try:
-                user_id = int(user_id)
-                user = await self.dbmanager.add_user(user_id)
-            except ValueError as value_err: # Error coming from the int() cast
-                self.logger.error(f"command `addusers` received: {value_err}")
-                await ctx.message.channel.send(f"invalid argument received: `{user_id}`; a UserId is expected, ignoring it...")
-                continue
-            # TODO: except 404 error -> if the request in add_user fails, we should continue here (ex: multiple users but only one can be wrong)
-            # except 404Error as 404_err: # Error coming from add_user() method
-            #     pass
-            
-            if user is None:
-                await ctx.message.channel.send(f"UserID {user_id} already exists in database")
-                self.logger.warning(f"UserID {user_id} already exists in database")
-                continue
-
-            await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
-            self.logger.info("command `addusers` added user '%s'", user)
-    
-    @commands.before_invoke(log_command_call)
-    @commands.command(name="adduser")
-    async def adduser(self, ctx, idx: int):
+    async def base_add_one_user(self, ctx, idx: int):
+        # TODO: except 404 error -> if the request in add_user fails
+        # try:
+        #     user = await self.dbmanager.add_user(idx)
+        # except 404Error as 404_err: # Error coming from add_user() method
+        #     pass
         user = await self.dbmanager.add_user(idx)
 
         if user is None:
             await ctx.message.channel.send(f"UserID {idx} already exists in database")
+            self.logger.warning(f"UserID {idx} already exists in database")
             return
 
         self.logger.info("Add user '%s'", user)
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
+    
+    @commands.before_invoke(log_command_call)
+    @commands.command(name="addusers")
+    async def addusers(self, ctx, *args):
+        self.logger.info(f"command `addusers` received {len(args)} arguments: {args}")
+        for user_id in args:
+            try:
+                user_id = int(user_id)
+            except ValueError as value_err: # Error coming from the int() cast
+                self.logger.error(f"command `addusers` received: {value_err}")
+                await ctx.message.channel.send(f"invalid argument received: `{user_id}`; a UserId is expected, ignoring it...")
+                continue
+            
+            # TODO: except 404 error -> if the request in add_user fails, we should continue here (ex: multiple users but only one can be wrong)
+            await self.base_add_one_user(ctx, user_id)
+    
+    @commands.before_invoke(log_command_call)
+    @commands.command(name="adduser")
+    async def adduser(self, ctx, idx: int):
+        await self.base_add_one_user(ctx, idx)
 
     @commands.before_invoke(log_command_call)
     @commands.command(name="getuser")
