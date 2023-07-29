@@ -44,12 +44,14 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         rl_idle = check if rate_limiter.is_idle() else cross
         # pylint: disable-next=no-member
         bot_loop_alive = check if self.check_new_solves.is_running() else cross
-        await ctx.send(f"RootMe API's Rate Limiter status:\n"
-                       f"- alive: {rl_alive}\n"
-                       f" - paused: {rl_paused}\n"
-                       f" - idle: {rl_idle}\n"
-                       f"Bot's `check_new_solves` loop:\n"
-                       f"- alive: {bot_loop_alive}\n")
+        await ctx.send(
+            f"RootMe API's Rate Limiter status:\n"
+            f"- alive: {rl_alive}\n"
+            f" - paused: {rl_paused}\n"
+            f" - idle: {rl_idle}\n"
+            f"Bot's `check_new_solves` loop:\n"
+            f"- alive: {bot_loop_alive}\n"
+        )
 
     @commands.command(name="resume")
     async def resume(self, ctx):
@@ -63,18 +65,44 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             "Resumed successfully from idle state, requests can be sent again."
         )
 
-    # TODO: add a add_users command that would accept a list of ids
-    @commands.before_invoke(log_command_call)
-    @commands.command(name="adduser")
-    async def adduser(self, ctx, idx: int):
+    async def base_add_one_user(self, ctx, idx: int):
+        # TODO: except 404 error -> if the request in add_user fails
+        # try:
+        #     user = await self.dbmanager.add_user(idx)
+        # except 404Error as 404_err: # Error coming from add_user() method
+        #     pass
         user = await self.dbmanager.add_user(idx)
 
         if user is None:
             await ctx.message.channel.send(f"UserID {idx} already exists in database")
+            self.logger.warning("UserID '%s' already exists in database", idx)
             return
 
         self.logger.info("Add user '%s'", user)
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
+
+    @commands.before_invoke(log_command_call)
+    @commands.command(name="addusers")
+    async def addusers(self, ctx, *args):
+        self.logger.info("command `addusers` received '%s' arguments: '%s'", len(args), args)
+        for user_id in args:
+            try:
+                user_id = int(user_id)
+            except ValueError as value_err:  # Error coming from the int() cast
+                self.logger.error("command `addusers` received: '%s'", value_err)
+                await ctx.message.channel.send(
+                    f"invalid argument received: `{user_id}`; a UserId is expected, ignoring it..."
+                )
+                continue
+
+            # TODO: except 404 error -> if the request in add_user fails, we
+            # should continue here (ex: multiple users but only one can be wrong)
+            await self.base_add_one_user(ctx, user_id)
+
+    @commands.before_invoke(log_command_call)
+    @commands.command(name="adduser")
+    async def adduser(self, ctx, idx: int):
+        await self.base_add_one_user(ctx, idx)
 
     @commands.before_invoke(log_command_call)
     @commands.command(name="getuser")
