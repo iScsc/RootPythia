@@ -14,8 +14,8 @@ NAME = "RootPythiaCommands"
 
 class RootPythiaCommands(commands.Cog, name=NAME):
     """
-    Define the commands that the bot will respond to, prefixed with the `command_prefix` defined at
-    the bot init
+    Define the commands that the bot will respond to, prefixed with '!' \
+    defined at the bot init
     """
 
     def __init__(self, bot, dbmanager):
@@ -36,6 +36,9 @@ class RootPythiaCommands(commands.Cog, name=NAME):
     @commands.before_invoke(log_command_call)
     @commands.command(name="status")
     async def status(self, ctx):
+        """
+            Give info on bot status
+        """
         rate_limiter = self.dbmanager.api_manager.rate_limiter
         check = ":white_check_mark:"
         cross = ":x:"
@@ -55,6 +58,9 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @commands.command(name="resume")
     async def resume(self, ctx):
+        """
+            The bot leaves its idle state
+        """
         rate_limiter = self.dbmanager.api_manager.rate_limiter
         if not rate_limiter.is_idle():
             await ctx.message.channel.send("The Rate Limiter isn't idle, no need to resume.")
@@ -65,17 +71,17 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             "Resumed successfully from idle state, requests can be sent again."
         )
 
-    async def base_add_one_user(self, ctx, idx: int):
+    async def base_add_one_user(self, ctx, user_id: int):
         # TODO: except 404 error -> if the request in add_user fails
         # try:
         #     user = await self.dbmanager.add_user(idx)
         # except 404Error as 404_err: # Error coming from add_user() method
         #     pass
-        user = await self.dbmanager.add_user(idx)
+        user = await self.dbmanager.add_user(user_id)
 
         if user is None:
-            await ctx.message.channel.send(f"UserID {idx} already exists in database")
-            self.logger.warning("UserID '%s' already exists in database", idx)
+            await ctx.message.channel.send(f"UserID {user_id} already exists in database")
+            self.logger.warning("UserID '%s' already exists in database", user_id)
             return
 
         self.logger.info("Add user '%s'", user)
@@ -83,9 +89,13 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @commands.before_invoke(log_command_call)
     @commands.command(name="addusers")
-    async def addusers(self, ctx, *args):
-        self.logger.info("command `addusers` received '%s' arguments: '%s'", len(args), args)
-        for user_id in args:
+    async def addusers(self, ctx, *user_ids):
+        """
+            Add several rootme users with [user_ids...] to the tracked users 
+            (each id is separated by a whitespace when using the command)
+        """
+        self.logger.info("command `addusers` received '%s' arguments: '%s'", len(user_ids), user_ids)
+        for user_id in user_ids:
             try:
                 user_id = int(user_id)
             except ValueError as value_err:  # Error coming from the int() cast
@@ -101,22 +111,28 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @commands.before_invoke(log_command_call)
     @commands.command(name="adduser")
-    async def adduser(self, ctx, idx: int):
-        await self.base_add_one_user(ctx, idx)
+    async def adduser(self, ctx, user_id: int):
+        """
+            Add rootme user with <user_id> to the tracked users
+        """
+        await self.base_add_one_user(ctx, user_id)
 
     @commands.before_invoke(log_command_call)
     @commands.command(name="getuser")
-    async def getuser(self, ctx, idx: int):
-        user = self.dbmanager.get_user(idx)
+    async def getuser(self, ctx, user_id: int):
+        """
+            Get rootme user info with <user_id>
+        """
+        user = self.dbmanager.get_user(user_id)
 
         if user is None:
-            self.logger.debug("DB Manager returned 'None' for UserID '%s'", idx)
+            self.logger.debug("DB Manager returned 'None' for UserID '%s'", user_id)
             await ctx.message.channel.send(
-                f"User id '{idx}' isn't in the database, you must add it first"
+                f"User id '{user_id}' isn't in the database, you must add it first"
             )
             return
 
-        self.logger.debug("Get user '%s' for id=%d", repr(user), idx)
+        self.logger.debug("Get user '%s' for id=%d", repr(user), user_id)
         await ctx.message.channel.send(
             f"{user} \nPoints: {user.score}\nRank: {user.rank}\nLast Solves: <TO BE COMPLETED>"
         )
