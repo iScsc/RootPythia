@@ -26,14 +26,6 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         # pylint: disable-next=no-member
         self.check_new_solves.start()
 
-    async def log_command_call(self, ctx):
-        # Maybe we should use the on_command event
-        # https://discordpy.readthedocs.io/en/stable/ext/commands/api.html?highlight=cog#discord.discord.ext.commands.on_command
-        # the logging would be implicit, no need of a redundant @commands.before_invoke(...) on
-        # each command. But right now I prefer to stick with this explicit solution
-        self.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
-
-    @commands.before_invoke(log_command_call)
     @commands.command(name="status")
     async def status(self, ctx):
         """
@@ -87,7 +79,6 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         self.logger.info("Add user '%s'", user)
         await ctx.message.channel.send(f"{user} added!\nPoints: {user.score}")
 
-    @commands.before_invoke(log_command_call)
     @commands.command(name="addusers")
     async def addusers(self, ctx, *user_ids):
         """
@@ -109,7 +100,6 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             # should continue here (ex: multiple users but only one can be wrong)
             await self.base_add_one_user(ctx, user_id)
 
-    @commands.before_invoke(log_command_call)
     @commands.command(name="adduser")
     async def adduser(self, ctx, user_id: int):
         """
@@ -117,7 +107,6 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         """
         await self.base_add_one_user(ctx, user_id)
 
-    @commands.before_invoke(log_command_call)
     @commands.command(name="getuser")
     async def getuser(self, ctx, user_id: int):
         """

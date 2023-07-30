@@ -92,3 +92,9 @@ async def on_error(event, *args, **kwargs):
         await BOT.channel.send(f"{event} event failed, please check logs for more details")
 
         BOT.logger.exception("Unhandled exception in '%s' event", event)
+
+
+@BOT.event
+async def on_command(ctx):
+    """Add logging when a command is triggered by a user"""
+    BOT.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
