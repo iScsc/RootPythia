@@ -29,11 +29,13 @@ def craft_intents():
     # Warning: message_content is a privileged intents
     # you must authorize it in the discord dev portal https://discord.com/developers/applications
     # enbale message_content privilegied intent to enable commands
-    # More info: https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.message_content
+    # More info below:
+    # https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.message_content
     intents.message_content = True
 
     # enable guild messages related events
-    # More info: https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.guild_messages
+    # More info below:
+    # https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.guild_messages
     intents.guild_messages = True
 
     return intents

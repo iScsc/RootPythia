@@ -13,7 +13,7 @@ class RootPythiaHelpCommand(HelpCommand):
     """
 
     def get_command_signature(self, command):
-        return '%s %s' % (command.qualified_name, command.signature)
+        return f"{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping):
         # color attribute sets color of the border on the left
@@ -31,7 +31,9 @@ class RootPythiaHelpCommand(HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command):
-        embed = discord.Embed(title=self.get_command_signature(command), color=discord.Color.blurple())
+        embed = discord.Embed(
+                title=self.get_command_signature(command),
+                color=discord.Color.blurple())
 
         if command.help:
             embed.description = command.help
@@ -41,20 +43,31 @@ class RootPythiaHelpCommand(HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
-        embed = discord.Embed(title=self.get_command_signature(group), description=group.help, color=discord.Color.blurple())
+        embed = discord.Embed(
+                title=self.get_command_signature(group),
+                description=group.help,
+                color=discord.Color.blurple())
 
         if filtered_commands := await self.filter_commands(group.commands):
             for command in filtered_commands:
-                embed.add_field(name=self.get_command_signature(command), value=command.help or "No Help Message Found... ")
+                embed.add_field(
+                        name=self.get_command_signature(command),
+                        value=command.help or "No Help Message Found... ")
 
         await self.get_destination().send(embed=embed)
 
     async def send_cog_help(self, cog):
-        embed = discord.Embed(title=cog.qualified_name or "No Category", description=cog.description, color=discord.Color.blurple())
+        embed = discord.Embed(
+                title=cog.qualified_name or "No Category",
+                description=cog.description,
+                color=discord.Color.blurple())
 
         if filtered_commands := await self.filter_commands(cog.get_commands()):
             for command in filtered_commands:
-                embed.add_field(name=self.get_command_signature(command), value=command.help or "No Help Message Found... ", inline=False)
+                embed.add_field(
+                        name=self.get_command_signature(command),
+                        value=command.help or "No Help Message Found... ",
+                        inline=False)
 
         await self.get_destination().send(embed=embed)
 

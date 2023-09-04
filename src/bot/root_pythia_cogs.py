@@ -85,7 +85,9 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             Add several rootme users with [user_ids...] to the tracked users 
             (each id is separated by a whitespace when using the command)
         """
-        self.logger.info("command `addusers` received '%s' arguments: '%s'", len(user_ids), user_ids)
+        self.logger.info(
+                "command `addusers` received '%s' arguments: '%s'", len(user_ids), user_ids
+                )
         for user_id in user_ids:
             try:
                 user_id = int(user_id)
