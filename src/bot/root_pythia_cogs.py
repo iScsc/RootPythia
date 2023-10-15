@@ -4,6 +4,7 @@ from os import getenv
 
 import discord
 from discord.ext import commands, tasks
+from discord.ext.commands.errors import CheckFailure
 
 from pngmaker import NewValidatedChallenge
 
@@ -146,6 +147,16 @@ class RootPythiaCommands(commands.Cog, name=NAME):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        if isinstance(error, CheckFailure):
+            self.logger.warning(
+                "discord.ext.commands.errors.CheckFailure (is_my_channel?)"
+                " was captured by on_command_error: some global check failed"
+                " for command: '%s' in channel ID '%s'",
+                ctx.command,
+                ctx.channel.id,
+            )
+            return
+
         await ctx.send("Command failed, please check logs for more details")
         await self.verbose_if_idle(ctx)
 

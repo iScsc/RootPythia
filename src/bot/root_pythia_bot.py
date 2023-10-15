@@ -13,7 +13,7 @@ from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
 
 
-CHANNEL_ID = getenv("CHANNEL_ID")
+CHANNEL_ID = int(getenv("CHANNEL_ID"))
 
 
 def craft_intents():
@@ -50,6 +50,9 @@ BOT.logger = logging.getLogger(__name__)
 
 
 ########### Setup bot events response ###############
+@BOT.check
+def is_my_channel(ctx):
+    return ctx.channel.id == CHANNEL_ID
 
 
 @BOT.event
