@@ -2,7 +2,6 @@ from asyncio import sleep as asleep
 import copy
 
 import pytest
-import discord
 import discord.ext.test as dpytest
 
 from data import auteurs_example_data
