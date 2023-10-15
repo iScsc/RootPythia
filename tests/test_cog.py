@@ -7,7 +7,7 @@ import discord.ext.test as dpytest
 from data import auteurs_example_data
 
 
-## NOTE: to debug: print(dpytest.get_messages().content)
+## NOTE: to debug: print(dpytest.get_message().content)
 
 @pytest.mark.asyncio
 async def test_adduser_command(config_bot):
