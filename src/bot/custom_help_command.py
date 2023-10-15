@@ -1,7 +1,7 @@
 import discord
 from discord.ext.commands import HelpCommand
 
-
+# pylint: disable=arguments-differ
 class RootPythiaHelpCommand(HelpCommand):
     """
     Implementation of HelpCommand
