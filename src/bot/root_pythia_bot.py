@@ -13,7 +13,13 @@ from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
 
 
-CHANNEL_ID = int(getenv("CHANNEL_ID"))
+CHANNEL_ID = getenv("CHANNEL_ID")
+if CHANNEL_ID.isnumeric():
+    CHANNEL_ID = int(CHANNEL_ID)
+else:
+    logging.warning(
+        "CHANNEL_ID environment variable is either not set or not an integer: %s", CHANNEL_ID
+    )
 
 
 def craft_intents():
