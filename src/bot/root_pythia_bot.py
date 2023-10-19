@@ -14,7 +14,7 @@ from bot.dummy_db_manager import DummyDBManager
 
 
 CHANNEL_ID = getenv("CHANNEL_ID")
-if CHANNEL_ID.isnumeric():
+if CHANNEL_ID is not None and CHANNEL_ID.isnumeric():
     CHANNEL_ID = int(CHANNEL_ID)
 else:
     logging.warning(
