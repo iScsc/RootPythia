@@ -7,6 +7,8 @@ import discord.ext.test as dpytest
 from data import auteurs_example_data
 
 
+## NOTE: to debug: print(dpytest.get_message().content)
+
 @pytest.mark.asyncio
 async def test_adduser_command(config_bot):
     # if the API Manager is not rightly mocked this test should fail, on purpose!
@@ -27,6 +29,18 @@ async def test_getuser_command(config_bot):
     # the .peek() call is needed to not remove the message from queue in order to verify it twice
     assert dpytest.verify().message().peek().contains().content("g0uZ")
     assert dpytest.verify().message().contains().content("Points: 3040")
+
+
+@pytest.mark.asyncio
+async def test_help_command(config_bot):
+    ###
+    # comments are the same than for test_adduser_command you should check it out
+    ###
+    await dpytest.message("!help")
+
+    embedded_help_words = ["adduser", "addusers", "getuser", "help", "status"]
+    for word in embedded_help_words:
+        assert dpytest.verify().message().peek().contains().content(word)
 
 
 @pytest.mark.asyncio

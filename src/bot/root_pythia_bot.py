@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from api.rootme_api import RootMeAPIManager
 from api.rate_limiter import RateLimiter
+from bot.custom_help_command import RootPythiaHelpCommand
 from bot.root_pythia_cogs import RootPythiaCommands
 from bot.dummy_db_manager import DummyDBManager
 
@@ -17,33 +18,42 @@ CHANNEL_ID = getenv("CHANNEL_ID")
 
 
 def craft_intents():
-    # Intents int: 19456 means:
-    # - Send messages
-    # - Embed Links
-    # - Read messages/View Channels
-    # configured in the discord dev portal https://discord.com/developers/applications
-    # Notice that the bot doesn't required the intent "Send messages in threads"
-    intents = discord.Intents(value=19456)
+    """Function that enables necessary intents for the bot"""
 
-    # Disable privilegied and enbale message_content privilegied intent to enable commands
+    # Disable everything
+    intents = discord.Intents.none()
+    # enable guild related events
+    # More info: https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.guilds
+    intents.guilds = True
+
+    # Warning: message_content is a privileged intents
+    # you must authorize it in the discord dev portal https://discord.com/developers/applications
+    # enbale message_content privilegied intent to enable commands
+    # More info below:
+    # https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.message_content
     intents.message_content = True
-    intents.messages = True
-    intents.typing = False
-    intents.guild_typing = False
-    intents.presences = False
+
+    # enable guild messages related events
+    # More info below:
+    # https://docs.pycord.dev/en/stable/api/data_classes.html#discord.Intents.guild_messages
+    intents.guild_messages = True
 
     return intents
 
 
 ########### Create bot object #################
 _DESCRIPTION = (
-    "RootPythia is a Discord bot fetching RootMe API to notify everyone"
+    "RootPythia is a Discord bot fetching RootMe API to notify everyone "
     "when a user solves a new challenge!"
 )
 _PREFIX = "!"
 _INTENTS = craft_intents()
 
-BOT = commands.Bot(command_prefix=_PREFIX, description=_DESCRIPTION, intents=_INTENTS)
+BOT = commands.Bot(
+        command_prefix=_PREFIX,
+        description=_DESCRIPTION,
+        intents=_INTENTS,
+        help_command=RootPythiaHelpCommand())
 
 # Create Bot own logger, each Cog will also have its own
 BOT.logger = logging.getLogger(__name__)
@@ -84,3 +94,9 @@ async def on_error(event, *args, **kwargs):
         await BOT.channel.send(f"{event} event failed, please check logs for more details")
 
         BOT.logger.exception("Unhandled exception in '%s' event", event)
+
+
+@BOT.event
+async def on_command(ctx):
+    """Add logging when a command is triggered by a user"""
+    BOT.logger.info("'%s' command triggered by '%s'", ctx.command, ctx.author)
