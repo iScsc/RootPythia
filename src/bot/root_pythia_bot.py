@@ -15,6 +15,12 @@ from bot.dummy_db_manager import DummyDBManager
 
 
 CHANNEL_ID = getenv("CHANNEL_ID")
+if CHANNEL_ID is not None and CHANNEL_ID.isnumeric():
+    CHANNEL_ID = int(CHANNEL_ID)
+else:
+    logging.warning(
+        "CHANNEL_ID environment variable is either not set or not an integer: %s", CHANNEL_ID
+    )
 
 
 def craft_intents():
@@ -60,6 +66,9 @@ BOT.logger = logging.getLogger(__name__)
 
 
 ########### Setup bot events response ###############
+@BOT.check
+def is_my_channel(ctx):
+    return ctx.channel.id == CHANNEL_ID
 
 
 @BOT.event
