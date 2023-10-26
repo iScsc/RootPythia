@@ -1,9 +1,9 @@
 import pytest
 
-from classes import User
-from bot.dummy_db_manager import DummyDBManager
-
 from data.rootme_api_example_data import auteurs_with_score_zero_example_data
+
+from bot.dummy_db_manager import DummyDBManager
+from classes import User
 
 
 @pytest.mark.asyncio
