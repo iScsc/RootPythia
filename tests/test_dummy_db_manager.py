@@ -1,5 +1,8 @@
 import pytest
 
+from data.rootme_api_example_data import auteurs_with_score_zero_example_data
+
+from bot.dummy_db_manager import DummyDBManager
 from classes import User
 
 
@@ -58,3 +61,23 @@ async def test_get_user(mock_dummy_db_manager):
     got_user = db.get_user(1)
 
     assert added_user is got_user
+
+
+@pytest.mark.asyncio
+async def test_add_user_with_empty_position(mock_rootme_api_manager):
+    # Regression test introduced with https://github.com/iScsc/RootPythia/pull/38
+    # the position was always parsed as an int however if the user's score is 0
+    # the root me api returns an empty position, causing the bug
+    # this test ensures this bug doesn't reappear
+
+    # Create an api manager returning the right data, and the associated db object
+    api_manager = mock_rootme_api_manager
+    api_manager.get_user_by_id.return_value = auteurs_with_score_zero_example_data
+    db = DummyDBManager(api_manager)
+
+    # Trigger test
+    added_user = await db.add_user(819227)
+
+    assert added_user.score == 0
+    assert added_user.nb_solves == 0
+    assert added_user.rank == 9999999  # default value, will probably have to be updated

@@ -50,6 +50,18 @@ auteurs_example_data = {
     ],
 }
 
+# This is not the real output for /auteurs/819227 on October, 26th 2023
+auteurs_with_score_zero_example_data = {
+    "id_auteur": "819227",
+    "nom": "Alphaphi",
+    "statut": "6forum",
+    "score": "0",
+    "position": "",
+    "challenges": [],
+    "solutions": [],
+    "validations": [],
+}
+
 
 # the real output for /challenges/5 on May, 30th 2023
 challenges_example_data = [

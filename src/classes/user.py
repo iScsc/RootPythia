@@ -39,7 +39,8 @@ class User:
         idx = int(data["id_auteur"])
         username = data["nom"]
         score = int(data["score"])
-        rank = int(data["position"])
+        _rank = data["position"]
+        rank = int(_rank) if _rank != "" else 9999999
         nb_solves = len(data["validations"])
 
         keys = User.keys()
