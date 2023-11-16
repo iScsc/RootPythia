@@ -1,5 +1,6 @@
 import logging
 
+from api.rootme_api import RootMeAPIError, RootMeAPIManager
 from classes import User
 from classes import Challenge
 
@@ -19,7 +20,7 @@ class InvalidUser(Exception):
 
 
 class DummyDBManager:
-    def __init__(self, api_manager):
+    def __init__(self, api_manager: RootMeAPIManager):
         self.users = []
         self.api_manager = api_manager
 
@@ -32,7 +33,10 @@ class DummyDBManager:
         if self.has_user(idx):
             return None
 
-        raw_user_data = await self.api_manager.get_user_by_id(idx)
+        try:
+            raw_user_data = await self.api_manager.get_user_by_id(idx)
+        except RootMeAPIError:
+            return None
 
         user = User(raw_user_data)
         self.users.append(user)
@@ -54,7 +58,14 @@ class DummyDBManager:
         if user is None:
             raise InvalidUser(idx, "DummyDBManager.fetch_user_new_solves: User %s not in database")
 
-        raw_user_data = await self.api_manager.get_user_by_id(idx)
+        try:
+            raw_user_data = await self.api_manager.get_user_by_id(idx)
+        except RootMeAPIError:
+            # If for some reason we can get the user on this iteration
+            # we will get him next time maybe ...
+            self.logger.error("User %s could not be fetch from the API, yet we keep running", idx)
+            return
+            
         user.update_new_solves(raw_user_data)
         if not user.has_new_solves():
             self.logger.debug("'%s' hasn't any new solves", user)
@@ -62,7 +73,11 @@ class DummyDBManager:
 
         self.logger.info("'%s' has %s new solves", user, user.nb_new_solves)
         for challenge_id in user.yield_new_solves(raw_user_data):
-            challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
+            try:
+                challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
+            except RootMeAPIError:
+                # If we can't fetch the challenge, sadly there is not much we can do
+                continue
             challenge = Challenge(challenge_id, challenge_data)
             self.logger.debug("'%s' solved '%s'", repr(user), repr(challenge))
             yield challenge
