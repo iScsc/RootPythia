@@ -185,6 +185,14 @@ class RateLimiter:
 
                 try:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
+                except RLRequestFailed as exc:
+                    # Request failed and should not be sent again
+                    self.requests[request.key]["result"] = None
+                    # set the exception
+                    self.requests[request.key]["exception"] = (
+                        RLRequestFailed(request, self.logger.error, "Request Failed"),
+                        exc,
+                    )
                 except RateLimiterError as exc:
                     if isinstance(exc, RLErrorWithPause):
                         await self.pause(exc.time_to_wait)
