@@ -7,6 +7,7 @@ run__prod () {
 	docker build --file Dockerfile -t ${NAME}:latest .
 	docker run --rm --interactive --tty \
 	--detach \
+	--volume $(realpath -P ${LOG_FOLDER}):/opt/${NAME}/logs
 	--env-file .env.prod \
 	--name ${NAME} \
 	${NAME}:latest
