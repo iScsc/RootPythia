@@ -44,6 +44,7 @@ def main():
 
     root_logger = logging.getLogger()
     discord_log_formatter = root_logger.handlers[0]
+
     # Add a file handler to the root logger
     file_handler = logging.handlers.RotatingFileHandler(
         "./logs/RootPythia.log", mode="a", maxBytes=LOG_FILE_SIZE_MAX, backupCount=LOG_FILES_NUMBER
@@ -51,6 +52,14 @@ def main():
     file_handler.setFormatter(discord_log_formatter)
     root_logger.addHandler(file_handler)
     logging.info("FileHandler added to root logger it will write to '%s'", file_handler.stream.name)
+
+    # Add a specific file handler to save warnings and errors
+    warning_file_handler = logging.FileHandler(
+        "./logs/RootPythiaErrors.log", mode="a"
+    )
+    warning_file_handler.setLevel(logging.WARNING)
+    warning_file_handler.setFormatter(discord_log_formatter)
+    root_logger.addHandler(warning_file_handler)
 
     # are these call secure??
     logging.debug("discord token: %s", DISCORD_TOKEN)
