@@ -5,3 +5,6 @@
 **/.env
 **/.env.prod
 **/.env.dev
+
+# Logs
+logs/**
