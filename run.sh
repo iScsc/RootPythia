@@ -5,6 +5,8 @@ NAME="root-pythia"
 run__prod () {
 	# prod mode
 	docker build --file Dockerfile -t ${NAME}:latest .
+
+	. .env.prod
 	docker run --rm --interactive --tty \
 	--detach \
 	--volume $(realpath -P ${LOG_FOLDER}):/opt/${NAME}/logs
