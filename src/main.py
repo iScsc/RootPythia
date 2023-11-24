@@ -2,6 +2,11 @@ import logging
 from os import getenv
 import sys
 
+import discord
+
+from bot import BOT as root_pythia
+
+### Default global variables
 # in bytes
 DEFAULT_LOG_FILE_SIZE_MAX = 10e6
 # the number of files the rotating file handler will generate at max
@@ -9,10 +14,8 @@ DEFAULT_LOG_FILE_SIZE_MAX = 10e6
 # see https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
 DEFAULT_LOG_FILES_NUMBER = 5
 
-import discord
 
-from bot import BOT as root_pythia
-
+### Global variables
 MODE = getenv("MODE")
 DISCORD_TOKEN = getenv("DISCORD_TOKEN")
 LOG_LEVEL = getenv("LOG_LEVEL")
@@ -24,14 +27,14 @@ try:
     LOG_FILE_SIZE_MAX = int(LOG_FILE_SIZE_MAX)
 except ValueError as exc:
     logging.exception("LOG_FILE_SIZE_MAX is not an integer")
-    exit(1)
+    sys.exit(1)
 
 LOG_FILES_NUMBER = getenv("LOG_FILES_NUMBER") or DEFAULT_LOG_FILES_NUMBER
 try:
     LOG_FILES_NUMBER = int(LOG_FILES_NUMBER)
 except ValueError as exc:
     logging.exception("LOG_FILES_NUMBER is not an integer")
-    exit(1)
+    sys.exit(1)
 
 
 def main():
@@ -39,7 +42,7 @@ def main():
     discord.utils.setup_logging(root=True, level=LOG_LEVEL)
 
     # Add a file handler to the root logger
-    file_handler = logging.RotatingFileHandler(
+    file_handler = logging.handlers.RotatingFileHandler(
         "./logs/RootPythia.log", mode="a", maxBytes=LOG_FILE_SIZE_MAX, backupCount=LOG_FILES_NUMBER
     )
     logging.getLogger().addHandler(file_handler)
