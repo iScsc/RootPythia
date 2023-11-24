@@ -5,7 +5,11 @@ NAME="root-pythia"
 run__prod () {
 	# prod mode
 	docker build --file Dockerfile -t ${NAME}:latest .
-	docker run --rm --interactive --tty --detach --env-file .env.prod --name ${NAME} ${NAME}:latest
+	docker run --rm --interactive --tty \
+	--detach \
+	--env-file .env.prod \
+	--name ${NAME} \
+	${NAME}:latest
 }
 
 run__dev () {
