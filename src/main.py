@@ -15,6 +15,11 @@ def main():
     # Setup a beautiful root logger
     discord.utils.setup_logging(root=True, level=LOG_LEVEL)
 
+    # Add a file handler to the root logger
+    file_handler = logging.RotatingFileHandler("./logs/RootPythia.log", mode='a', maxBytes=10e6, backupCount=5)
+    logging.getLogger().addHandler(file_handler)
+    logging.info("FileHandler added to root logger it will write to '%s'", file_handler.stream.name)
+
     # are these call secure??
     logging.debug("discord token: %s", DISCORD_TOKEN)
 
