@@ -62,7 +62,10 @@ class DatabaseManager:
         return user
 
     def has_user(self, idx):
-        return self.get_user(idx) is not None
+        cur = self.db.cursor()
+        res = cur.execute("SELECT * FROM users WHERE id=(?)", (idx,)).fetchone()
+        cur.close()
+        return res is not None
 
     def get_user(self, idx):
         """Retrieve the user object whose id matches 'id', None if not found"""
