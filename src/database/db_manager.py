@@ -2,7 +2,10 @@ import logging
 import sqlite3
 from os import getenv, path
 
-from database.db_structure import sql_create_user_table
+from database.db_structure import (
+    sql_create_user_table,
+    sql_add_user,
+)
 from classes import User
 from classes import Challenge
 
@@ -49,16 +52,20 @@ class DatabaseManager:
 
     async def add_user(self, idx):
         """Call the API Manager to get a user by his id then create a User object and store it"""
+        cur = self.db.cursor()
 
         # Check wether the user is already added
         if self.has_user(idx):
             return None
 
+        # Retreive information from RootMe API
         raw_user_data = await self.api_manager.get_user_by_id(idx)
-
         user = User(raw_user_data)
-        self.users.append(user)
-        self.logger.debug("add user '%s'", repr(user))
+
+        cur.execute(sql_add_user, user.to_tuple())
+        self.db.commit()
+        self.logger.debug("Add user '%s'", repr(user))
+        cur.close()
         return user
 
     def has_user(self, idx):

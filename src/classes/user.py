@@ -15,6 +15,9 @@ class User:
         """
         parsed_data = User.parse_rootme_user_data(data)
 
+        self.as_dict = parsed_data
+        self.as_tuple = tuple(parsed_data.values())
+
         self.idx = parsed_data["idx"]
         self.username = parsed_data["username"]
         self.score = parsed_data["score"]
@@ -56,6 +59,12 @@ class User:
         for solve in every_solve_iter:
             solve_id = int(solve["id_challenge"])
             yield solve_id
+
+    def to_dict(self):
+        return self.as_dict
+
+    def to_tuple(self):
+        return self.as_tuple
 
     def __repr__(self):
         return (
