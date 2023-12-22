@@ -2,6 +2,7 @@ import logging
 import sqlite3
 from os import getenv, path
 
+from database.db_structure import sql_create_user_table
 from classes import User
 from classes import Challenge
 
@@ -36,9 +37,15 @@ class DummyDBManager:
         db_file_path = path.join(DB_FOLDER, DB_FILE_NAME)
         self.db = sqlite3.connect(db_file_path)
         self.logger.info("Succesfully connected to database %s", db_file_path)
+        self._init_db()
 
         self.api_manager = api_manager
 
+    def _init_db(self):
+        """Private function that initializes the database tables (see db_strucure.py)"""
+        cur = self.db.cursor()
+        cur.execute(sql_create_user_table)
+        cur.close()
 
     async def add_user(self, idx):
         """Call the API Manager to get a user by his id then create a User object and store it"""
