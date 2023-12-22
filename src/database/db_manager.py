@@ -25,7 +25,7 @@ class InvalidUser(Exception):
         super().__init__(self.message)
 
 
-class DummyDBManager:
+class DatabaseManager:
     def __init__(self, api_manager):
         self.logger = logging.getLogger(__name__)
 

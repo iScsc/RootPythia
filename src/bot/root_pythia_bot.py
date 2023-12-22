@@ -11,7 +11,7 @@ from api.rootme_api import RootMeAPIManager
 from api.rate_limiter import RateLimiter
 from bot.custom_help_command import RootPythiaHelpCommand
 from bot.root_pythia_cogs import RootPythiaCommands
-from bot.dummy_db_manager import DummyDBManager
+from database import DatabaseManager
 
 
 CHANNEL_ID = getenv("CHANNEL_ID")
