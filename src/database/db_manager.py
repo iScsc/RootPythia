@@ -77,7 +77,7 @@ class DatabaseManager:
     async def fetch_user_new_solves(self, idx):
         user = self.get_user(idx)
         if user is None:
-            raise InvalidUser(idx, "DummyDBManager.fetch_user_new_solves: User %s not in database")
+            raise InvalidUser(idx, "DatabaseManager.fetch_user_new_solves: User %s not in database")
 
         raw_user_data = await self.api_manager.get_user_by_id(idx)
         user.update_new_solves(raw_user_data)
