@@ -5,6 +5,8 @@ from os import getenv, path
 from database.db_structure import (
     sql_create_user_table,
     sql_add_user,
+    sql_get_user,
+    sql_get_users,
 )
 from classes import User
 from classes import Challenge
@@ -76,10 +78,20 @@ class DatabaseManager:
 
     def get_user(self, idx):
         """Retrieve the user object whose id matches 'id', None if not found"""
-        return next(filter(lambda user: user.idx == idx, self.users), None)
+        cur = self.db.cursor()
+        res = cur.execute(sql_get_user, (idx, )).fetchone()
+        if res is None:
+            return None
+        user = User(res)
+        cur.close()
+        return user
 
     def get_users(self):
-        return self.users
+        cur = self.db.cursor()
+        res = cur.execute(sql_get_users).fetchall()
+        users = [User(elt) for elt in res]
+        cur.close()
+        return users
 
     async def fetch_user_new_solves(self, idx):
         user = self.get_user(idx)

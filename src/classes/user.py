@@ -5,7 +5,7 @@ class InvalidUserData(Exception):
 class User:
     """Class for the User object"""
 
-    def __init__(self, data: dict):
+    def __init__(self, data: [dict, tuple]):
         """
         idx: int,
         username: str,
@@ -13,12 +13,15 @@ class User:
         rank: int,
         solves: int,
         """
-        parsed_data = User.parse_rootme_user_data(data)
+        if isinstance(data, dict):
+            parsed_data = User.parse_rootme_user_data(data)
+        elif isinstance(data, tuple):
+            parsed_data = dict(zip(User.keys(), list(data)))
 
         self.as_dict = parsed_data
         self.as_tuple = tuple(parsed_data.values())
 
-        self.idx = parsed_data["idx"]
+        self.idx = parsed_data["id"]
         self.username = parsed_data["username"]
         self.score = parsed_data["score"]
         self.rank = parsed_data["rank"]
@@ -28,7 +31,7 @@ class User:
 
     @staticmethod
     def keys():
-        return ["idx", "username", "score", "rank", "nb_solves"]
+        return ["id", "username", "score", "rank", "nb_solves"]
 
     # TODO: move these static methods to rootme_api, it make more sense
     # or create a Parser object? we could then have a RootMeParser and a HTBParser
@@ -74,6 +77,12 @@ class User:
 
     def __str__(self):
         return f"{self.username} #{self.idx}"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, User):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return self.as_tuple == other.as_tuple
 
     def update_new_solves(self, raw_user_data):
         parsed_data = User.parse_rootme_user_data(raw_user_data)

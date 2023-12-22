@@ -60,7 +60,7 @@ async def test_get_user(mock_database_manager):
     added_user = await db.add_user(1)
     got_user = db.get_user(1)
 
-    assert added_user is got_user
+    assert added_user == got_user
 
 
 @pytest.mark.asyncio
