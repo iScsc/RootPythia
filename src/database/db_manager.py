@@ -7,7 +7,6 @@ from classes import User
 from classes import Challenge
 
 
-DB_FOLDER = getenv("DB_FOLDER")
 DB_FILE_NAME = "RootPythia.db"
 
 
@@ -29,12 +28,13 @@ class DatabaseManager:
     def __init__(self, api_manager):
         self.logger = logging.getLogger(__name__)
 
-        if DB_FOLDER is None or not path.isdir(DB_FOLDER):
-            self.logger.critical("DB_FOLDER: '%s', is not a directory", DB_FOLDER)
-            raise Exception(f"DB_FOLDER: '{DB_FOLDER}', is not a directory")
+        self.DB_FOLDER = getenv("DB_FOLDER")
+        if self.DB_FOLDER is None or not path.isdir(self.DB_FOLDER):
+            self.logger.critical("DB_FOLDER: '%s', is not a directory", self.DB_FOLDER)
+            raise Exception(f"DB_FOLDER: '{self.DB_FOLDER}', is not a directory")
 
         # Init Connection object allowing interaction with the database
-        db_file_path = path.join(DB_FOLDER, DB_FILE_NAME)
+        db_file_path = path.join(self.DB_FOLDER, DB_FILE_NAME)
         self.db = sqlite3.connect(db_file_path)
         self.logger.info("Succesfully connected to database '%s'", db_file_path)
         self._init_db()
