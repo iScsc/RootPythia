@@ -36,7 +36,7 @@ class DatabaseManager:
         # Init Connection object allowing interaction with the database
         db_file_path = path.join(DB_FOLDER, DB_FILE_NAME)
         self.db = sqlite3.connect(db_file_path)
-        self.logger.info("Succesfully connected to database %s", db_file_path)
+        self.logger.info("Succesfully connected to database '%s'", db_file_path)
         self._init_db()
 
         self.api_manager = api_manager
