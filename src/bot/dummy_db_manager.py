@@ -1,7 +1,12 @@
 import logging
+import sqlite3
+from os import getenv, path
 
 from classes import User
 from classes import Challenge
+
+
+DB_FOLDER = getenv("DB_FOLDER")
 
 
 class InvalidUser(Exception):
@@ -20,10 +25,16 @@ class InvalidUser(Exception):
 
 class DummyDBManager:
     def __init__(self, api_manager):
-        self.users = []
+        self.logger = logging.getLogger(__name__)
+
+        if DB_FOLDER is None or not path.isdir(DB_FOLDER):
+            self.logger.critical("DB_FOLDER: '%s', is not a directory")
+            raise Exception("DB_FOLDER: '%s', is not a directory")
+
+        self.db = sqlite3.connect(path.join(DB_FOLDER, "RootPythia.db"))
+
         self.api_manager = api_manager
 
-        self.logger = logging.getLogger(__name__)
 
     async def add_user(self, idx):
         """Call the API Manager to get a user by his id then create a User object and store it"""
