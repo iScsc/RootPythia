@@ -88,7 +88,7 @@ async def test_command_exception_handling(config_bot, mocker):
     # patching this method in particular is arbitrary: the only goal is to raise an exception
     # during a command execution
     # I chose the "getuser" command purely arbitrary and this could be changed in the future
-    mocker.patch("bot.dummy_db_manager.DummyDBManager.get_user", side_effect=Exception)
+    mocker.patch("database.DatabaseManager.get_user", side_effect=Exception)
 
     # Trigger test
     with pytest.raises(Exception):
@@ -100,8 +100,8 @@ async def test_command_exception_handling(config_bot, mocker):
 @pytest.mark.asyncio
 async def test_loop_exception_handling(config_bot, mocker):
     bot = config_bot
-    # patching "DummyDBManager.get_userS" here!
-    mocker.patch("bot.dummy_db_manager.DummyDBManager.get_users", side_effect=Exception)
+    # patching "DatabaseManager.get_userS" here!
+    mocker.patch("database.DatabaseManager.get_users", side_effect=Exception)
     # changing the check_new_solves loop delay interval to speed up the test
     cog = bot.get_cog(pytest.COG_NAME)
     cog.check_new_solves.change_interval(seconds=0.1)

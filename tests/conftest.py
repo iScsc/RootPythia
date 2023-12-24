@@ -13,7 +13,7 @@ from data import auteurs_example_data, challenges_example_data
 
 from bot.root_pythia_cogs import RootPythiaCommands
 from bot.root_pythia_cogs import NAME as COG_NAME
-from bot.dummy_db_manager import DummyDBManager
+from database import DatabaseManager
 
 # these plugins will be automatically imported by pytest
 pytest_plugins = ["pytest_mock", "pytest_asyncio"]
@@ -57,17 +57,19 @@ def mock_rootme_api_manager(mocker):
 
 
 @pytest.fixture
-def mock_dummy_db_manager(mock_rootme_api_manager):
+def mock_database_manager(mock_rootme_api_manager, monkeypatch, tmp_path):
     rootme_api_manager = mock_rootme_api_manager
+    monkeypatch.setenv("DB_FOLDER", str(tmp_path))
 
-    db = DummyDBManager(rootme_api_manager)
+    db = DatabaseManager(rootme_api_manager)
     yield db
+    db.db.close()
 
 
 # this pytest_asyncio decorator allows to automatically await async fixture before passing them
 # to tests
 @pytest_asyncio.fixture
-async def config_bot(mock_dummy_db_manager, null_logger):
+async def config_bot(mock_database_manager, null_logger):
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
@@ -76,7 +78,7 @@ async def config_bot(mock_dummy_db_manager, null_logger):
     _bot.logger = null_logger
 
     await _bot._async_setup_hook()
-    await _bot.add_cog(RootPythiaCommands(_bot, mock_dummy_db_manager))
+    await _bot.add_cog(RootPythiaCommands(_bot, mock_database_manager))
 
     dpytest.configure(_bot)
 
