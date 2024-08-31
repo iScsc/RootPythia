@@ -14,3 +14,6 @@ sql_get_user = """SELECT * FROM users WHERE id=?;"""
 
 
 sql_get_users = """SELECT * FROM users;"""
+
+
+sql_has_user = """SELECT * FROM users WHERE id=(?)"""

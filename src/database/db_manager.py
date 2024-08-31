@@ -7,6 +7,7 @@ from database.db_structure import (
     sql_add_user,
     sql_get_user,
     sql_get_users,
+    sql_has_user,
 )
 from classes import User
 from classes import Challenge
@@ -72,7 +73,7 @@ class DatabaseManager:
 
     def has_user(self, idx):
         cur = self.db.cursor()
-        res = cur.execute("SELECT * FROM users WHERE id=(?)", (idx,)).fetchone()
+        res = cur.execute(sql_has_user, (idx, )).fetchone()
         cur.close()
         return res is not None
 
