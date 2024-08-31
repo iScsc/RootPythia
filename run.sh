@@ -1,6 +1,6 @@
 #!/bin/sh
 
-NAME="root-pythia"
+NAME="rootpythia"
 
 run__prod () {
 	# prod mode
