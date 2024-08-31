@@ -11,7 +11,7 @@ from api.rootme_api import RootMeAPIManager
 from api.rate_limiter import RateLimiter
 from bot.custom_help_command import RootPythiaHelpCommand
 from bot.root_pythia_cogs import RootPythiaCommands
-from bot.dummy_db_manager import DummyDBManager
+from database import DatabaseManager
 
 
 CHANNEL_ID = getenv("CHANNEL_ID")
@@ -74,12 +74,15 @@ def is_my_channel(ctx):
 @BOT.event
 async def on_ready():
     # is this call secure??
-    logging.debug("channel id: %s", CHANNEL_ID)
+    BOT.logger.debug("channel id: %s", CHANNEL_ID)
 
-    # Create Rate Limiter, API Manager, and DB Manager objects
+    # Create Rate Limiter, API Manager, and Database Manager objects
     rate_limiter = RateLimiter()
+    BOT.logger.debug("Successfully created RateLimiter")
     api_manager = RootMeAPIManager(rate_limiter)
-    db_manager = DummyDBManager(api_manager)
+    BOT.logger.debug("Successfully created RootMeAPIManager")
+    db_manager = DatabaseManager(api_manager)
+    BOT.logger.debug("Successfully created DatabaseManager")
 
     # Fetch main channel and send initialization message
     BOT.channel = await BOT.fetch_channel(CHANNEL_ID)
@@ -92,8 +95,9 @@ async def on_ready():
 @BOT.event
 async def on_error(event, *args, **kwargs):
     if event == "on_ready":
-        BOT.logger.error(
-            "Event '%s' failed (probably from invalid channel ID), close connection and exit...",
+        BOT.logger.exception("Unhandled exception in 'on_ready' event:")
+        BOT.logger.critical(
+            "Event '%s' failed, please check debug logs, close connection and exit...",
             event,
         )
         await BOT.close()

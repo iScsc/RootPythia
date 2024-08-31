@@ -10,6 +10,7 @@ run__prod () {
 	docker run --rm --interactive --tty \
 	--detach \
 	--volume $(realpath -P ${LOG_FOLDER}):/opt/${NAME}/logs \
+	--volume $(realpath -P  ${DB_FOLDER}):/opt/${NAME}/${DB_FOLDER} \
 	--env-file .env.prod \
 	--name ${NAME} \
 	${NAME}:latest

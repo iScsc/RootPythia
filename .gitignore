@@ -8,3 +8,7 @@
 
 # Logs
 logs/**
+
+# Database folder
+data/**
+
