@@ -37,7 +37,7 @@ class DatabaseManager:
         self.DB_FOLDER = getenv("DB_FOLDER")
         if self.DB_FOLDER is None or not path.isdir(self.DB_FOLDER):
             self.logger.critical("DB_FOLDER: '%s', is not a directory", self.DB_FOLDER)
-            raise Exception(f"DB_FOLDER: '{self.DB_FOLDER}', is not a directory")
+            raise OSError(f"DB_FOLDER: '{self.DB_FOLDER}', is not a directory")
 
         # Init Connection object allowing interaction with the database
         db_file_path = path.join(self.DB_FOLDER, DB_FILE_NAME)

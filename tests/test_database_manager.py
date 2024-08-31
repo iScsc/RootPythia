@@ -2,7 +2,6 @@ import pytest
 
 from data.rootme_api_example_data import auteurs_with_score_zero_example_data
 
-from database import DatabaseManager
 from classes import User
 
 
