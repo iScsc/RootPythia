@@ -49,6 +49,21 @@ class RootPythiaCommands(commands.Cog, name=NAME):
             f"- alive: {bot_loop_alive}\n"
         )
 
+    @commands.command(name="pause")
+    async def pause(self, ctx):
+        """
+            The bot enters its idle state
+        """
+        rate_limiter = self.dbmanager.get_api_manager().get_rate_limiter()
+        if rate_limiter.is_idle():
+            await ctx.message.channel.send("The Rate Limiter is already idle, can't pause.")
+            return
+
+        rate_limiter.go_idle(manually = True)
+        await ctx.message.channel.send(
+            "Bot is in idle state, no requests will be sent."
+        )
+
     @commands.command(name="resume")
     async def resume(self, ctx):
         """
