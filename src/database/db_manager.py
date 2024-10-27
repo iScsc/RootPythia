@@ -2,6 +2,7 @@ import logging
 import sqlite3
 from os import getenv, path
 
+from api.rootme_api import RootMeAPIError
 from database.db_structure import (
     sql_create_user_table,
     sql_add_user,
@@ -64,8 +65,11 @@ class DatabaseManager:
         if self.has_user(idx):
             return None
 
-        # Retreive information from RootMe API
-        raw_user_data = await self.api_manager.get_user_by_id(idx)
+        # Retrieve information from RootMe API
+        try:
+            raw_user_data = await self.api_manager.get_user_by_id(idx)
+        except RootMeAPIError:
+            return None
         user = User(raw_user_data)
 
         cur.execute(sql_add_user, user.to_tuple())
@@ -102,7 +106,13 @@ class DatabaseManager:
         if user is None:
             raise InvalidUser(idx, "DatabaseManager.fetch_user_new_solves: User %s not in database")
 
-        raw_user_data = await self.api_manager.get_user_by_id(idx)
+        try:
+            raw_user_data = await self.api_manager.get_user_by_id(idx)
+        except RootMeAPIError:
+            # If for some reason we can get the user on this iteration
+            # we will get him next time maybe ...
+            self.logger.error("User %s could not be fetch from the API, yet we keep running", idx)
+            return
         user.update_new_solves(raw_user_data)
         if not user.has_new_solves():
             self.logger.debug("'%s' hasn't any new solves", user)
@@ -110,7 +120,11 @@ class DatabaseManager:
 
         self.logger.info("'%s' has %s new solves", user, user.nb_new_solves)
         for challenge_id in user.yield_new_solves(raw_user_data):
-            challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
+            try:
+                challenge_data = await self.api_manager.get_challenge_by_id(challenge_id)
+            except RootMeAPIError:
+                # If we can't fetch the challenge, sadly there is not much we can do
+                continue
             challenge = Challenge(challenge_id, challenge_data)
             self.logger.debug("'%s' solved '%s'", repr(user), repr(challenge))
             yield challenge

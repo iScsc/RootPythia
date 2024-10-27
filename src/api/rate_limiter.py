@@ -22,12 +22,22 @@ class RateLimiterError(Exception):
             message = f"Request %s: %s + %s {message}"
             log(message, request.method, request.url, request.cookies)
 
+class RLRequestFailed(RateLimiterError):
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(request, *args, **kwargs)
+
+class RLRequestClientError(RLRequestFailed):
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(request, *args, **kwargs)
 
 class RLErrorWithPause(RateLimiterError):
     def __init__(self, request, time_to_wait, *args, **kwargs):
         super().__init__(request, *args, **kwargs)
         self.time_to_wait = time_to_wait
 
+class RLRequestServerError(RLErrorWithPause):
+    def __init__(self, request, time_to_wait, *args, **kwargs):
+        super().__init__(request, time_to_wait, *args, **kwargs)
 
 # pylint: disable=too-few-public-methods
 class RequestEntry:
@@ -101,6 +111,21 @@ class RateLimiter:
         match resp.status_code:
             case 200:
                 return resp.json()
+            case 400, 401, 403, 404, 405:
+                # HTTP failure client side
+                raise RLRequestClientError(
+                    request,
+                    self.logger.error,
+                    f"40X error code, client side error, useless to retry."
+                )
+            case 500, 501, 502, 503, 504:
+                # HTTP failure server side
+                raise RLRequestServerError(
+                    request,
+                    300,
+                    self.logger.error,
+                    f"50X error code, server side error, retry in 5 min ..."
+                )
             case 429:
                 try:
                     time_to_wait = int(resp.headers["Retry-After"])
@@ -163,6 +188,14 @@ class RateLimiter:
 
                 try:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
+                except RLRequestFailed as exc:
+                    # Request failed and should not be sent again
+                    self.requests[request.key]["result"] = None
+                    # set the exception
+                    self.requests[request.key]["exception"] = (
+                        RLRequestFailed(request, self.logger.error, "Request Failed"),
+                        exc,
+                    )
                 except RateLimiterError as exc:
                     if isinstance(exc, RLErrorWithPause):
                         await self.wait(exc.time_to_wait)
