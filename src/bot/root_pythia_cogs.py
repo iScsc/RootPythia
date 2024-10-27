@@ -36,17 +36,32 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         check = ":white_check_mark:"
         cross = ":x:"
         rl_alive = cross if rate_limiter.task.done() else check
-        rl_paused = check if rate_limiter.is_paused() else cross
+        rl_waiting = check if rate_limiter.is_waiting() else cross
         rl_idle = check if rate_limiter.is_idle() else cross
         # pylint: disable-next=no-member
         bot_loop_alive = check if self.check_new_solves.is_running() else cross
         await ctx.send(
             f"RootMe API's Rate Limiter status:\n"
             f"- alive: {rl_alive}\n"
-            f" - paused: {rl_paused}\n"
+            f" - waiting: {rl_waiting}\n"
             f" - idle: {rl_idle}\n"
             f"Bot's `check_new_solves` loop:\n"
             f"- alive: {bot_loop_alive}\n"
+        )
+
+    @commands.command(name="pause")
+    async def pause(self, ctx):
+        """
+            The bot enters its idle state
+        """
+        rate_limiter = self.dbmanager.get_api_manager().get_rate_limiter()
+        if rate_limiter.is_idle():
+            await ctx.message.channel.send("The Rate Limiter is already idle, can't pause.")
+            return
+
+        rate_limiter.go_idle(manually = True)
+        await ctx.message.channel.send(
+            "Bot is in idle state, no requests will be sent."
         )
 
     @commands.command(name="resume")
@@ -54,7 +69,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         """
             The bot leaves its idle state
         """
-        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        rate_limiter = self.dbmanager.get_api_manager().get_rate_limiter()
         if not rate_limiter.is_idle():
             await ctx.message.channel.send("The Rate Limiter isn't idle, no need to resume.")
             return

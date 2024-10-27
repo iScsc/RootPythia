@@ -58,7 +58,7 @@ class RateLimiter:
         else:
             self._max_attempt = DEFAULT_MAX_ATTEMPT
 
-        self._pause = False
+        self._waiting = False
         self._idle = False
         self._request_timeout = request_timeout or DEFAULT_REQUEST_TIMEOUT
         self._timeout_delay = timeout_delay or DEFAULT_TIMEOUT_DELAY
@@ -66,9 +66,12 @@ class RateLimiter:
         self.task = asyncio.create_task(self.handle_requests())
         self.logger = logging.getLogger(__name__)
 
-    def go_idle(self):
+    def go_idle(self, manually = False):
         self._idle = True
-        self.logger.error("Entering idle state due to previous errors")
+        if manually:
+            self.logger.error("Entering idle state due to manual command")
+        else:
+            self.logger.error("Entering idle state due to previous errors")
 
     def is_idle(self):
         return self._idle
@@ -77,13 +80,13 @@ class RateLimiter:
         self.logger.info("Resuming from idle state")
         self._idle = False
 
-    def is_paused(self):
-        return self._pause
+    def is_waiting(self):
+        return self._waiting
 
-    async def pause(self, delay):
-        self._pause = True
+    async def wait(self, delay):
+        self._waiting = True
         await asyncio.sleep(delay)
-        self._pause = False
+        self._waiting = False
 
     def handle_get_request(self, request):
         try:
@@ -162,7 +165,7 @@ class RateLimiter:
                     self.requests[request.key]["result"] = self.handle_get_request(request)
                 except RateLimiterError as exc:
                     if isinstance(exc, RLErrorWithPause):
-                        await self.pause(exc.time_to_wait)
+                        await self.wait(exc.time_to_wait)
 
                     if request.attempt < self._max_attempt:
                         await self.queue.put(request)

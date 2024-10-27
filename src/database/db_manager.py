@@ -53,6 +53,9 @@ class DatabaseManager:
         cur.execute(sql_create_user_table)
         cur.close()
 
+    def get_api_manager(self):
+        return self.api_manager
+
     async def add_user(self, idx):
         """Call the API Manager to get a user by his id then create a User object and store it"""
         cur = self.db.cursor()
