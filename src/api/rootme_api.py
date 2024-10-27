@@ -19,6 +19,9 @@ class RootMeAPIManager:
             raise RuntimeError("API_URL is not set.")
         self.rate_limiter = rate_limiter
 
+    def get_rate_limiter(self):
+        return self.rate_limiter
+
     async def get_challenge_by_id(self, _id):
         """
         Get a challenge from the API
