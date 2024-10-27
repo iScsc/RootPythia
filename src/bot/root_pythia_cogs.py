@@ -54,7 +54,7 @@ class RootPythiaCommands(commands.Cog, name=NAME):
         """
             The bot leaves its idle state
         """
-        rate_limiter = self.dbmanager.api_manager.rate_limiter
+        rate_limiter = self.dbmanager.get_api_manager().get_rate_limiter()
         if not rate_limiter.is_idle():
             await ctx.message.channel.send("The Rate Limiter isn't idle, no need to resume.")
             return
