@@ -66,9 +66,12 @@ class RateLimiter:
         self.task = asyncio.create_task(self.handle_requests())
         self.logger = logging.getLogger(__name__)
 
-    def go_idle(self):
+    def go_idle(self, manually = False):
         self._idle = True
-        self.logger.error("Entering idle state due to previous errors")
+        if manually:
+            self.logger.error("Entering idle state due to manual command")
+        else:
+            self.logger.error("Entering idle state due to previous errors")
 
     def is_idle(self):
         return self._idle
